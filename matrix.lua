@@ -66,16 +66,47 @@ function Matrix.rotate(mat, nrotations)
         return Matrix.copy(mat)
     end
 
-    for _ = 1, nrotations do
-        local new_mat = {}
+    local new_mat = {}
+    if nrotations == 1 then
         for col = 1, #(mat[1]) do
+            --[[
+            1 2  --> 3 1
+            3 4      4 2
+
+            1st col reversed becomes 1st row
+            ]]
+
             local column = Matrix.column(mat, col)
             Array.reverse(column)
             new_mat[col] = column
         end
-        mat = new_mat
+    -- smae as nrotations == -1
+    elseif nrotations == 3 then
+            --[[
+            1 2  --> 2 4
+            3 4      1 3
+
+            1st col becomes last row
+            ]]
+        for col = 1, #(mat[1]) do
+            local column = Matrix.column(mat, col)
+            new_mat[#mat - col + 1] = column
+        end
+    else -- nrotations == 2
+        --[[
+            1 2  --> 4 3
+            3 4      2 1
+
+            1st row reversed becomes last row
+        ]]
+        for i = 1, #mat[1] do
+            local row = Array.copy(mat[i])
+            Array.reverse(row)
+            new_mat[#mat - i + 1] = row
+        end
     end
-    return mat
+
+    return new_mat
 end
 
 function Matrix.fill(mat, value)

@@ -197,9 +197,53 @@ local function TEST_FindProperRotation()
     end
 end
 
+local function TEST_RotateMatrix()
+    local mat = {{1, 2},
+                 {3, 4}}
+
+    local rot1 = {{3, 1},
+                  {4, 2}}
+
+    local rot2 = {{4, 3},
+                  {2, 1}}
+
+    local rot3 = {{2, 4},
+                  {1, 3}}
+
+    local res = ExpectDeepEquals(rot1, Matrix.rotate(mat, 1), "rotate 1 failed")
+    res = ExpectDeepEquals(rot2, Matrix.rotate(mat, 2), "rotate 2 failed")
+    res = ExpectDeepEquals(rot3, Matrix.rotate(mat, 3), "rotate 3 failed")
+    res = ExpectDeepEquals(rot1, Matrix.rotate(mat, 401), "rotate 401 failed")
+    res = ExpectDeepEquals(rot3, Matrix.rotate(mat, -1), "rotate -1 failed")
+
+    if not res then
+        print("mat:")
+        Matrix.print(mat)
+
+        print("rot1:")
+        Matrix.print(Matrix.rotate(mat, 1))
+        
+        print("rot2:")
+        Matrix.print(Matrix.rotate(mat, 2))
+        
+        print("rot3:")
+        Matrix.print(Matrix.rotate(mat, 3))
+
+        print("rot401:")
+        Matrix.print(Matrix.rotate(mat, 401))
+
+        print("rot-1:")
+        Matrix.print(Matrix.rotate(mat, -1))
+    else
+        print("Passed")
+    end
+end
+
 -- TEST_FillEntireFieldManually()
 -- TEST_CannotPlaceThirdShapeManually()
 -- TEST_FillEntireFieldAutomatically()
 -- TEST_CannotPlaceThirdShapeAutomatically()
 -- TEST_FindProperRotation()
 -- TEST_FindProperPermutation()
+
+-- TEST_RotateMatrix()

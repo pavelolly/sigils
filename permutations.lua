@@ -1,6 +1,6 @@
-require "array"
+require "Array"
 
-function permute(array, permutation)
+function Permute(array, permutation)
     local new_array = {}
     for i, idx in ipairs(permutation) do
         new_array[i] = array[idx]
@@ -11,14 +11,14 @@ end
 --
 -- https://ru.wikipedia.org/wiki/Алгоритм_Нарайаны
 --
-function permutations(array)
-    local seq
-    local iter = function()
+function Permutations(array, seq)
+    if seq then seq = Array.copy(seq) end
+    return function()
         if (not seq) then
             seq = {}
             for i=1,#array do seq[i] = i end
             if (not next(seq)) then return nil end
-            return permute(array, seq)
+            return Permute(array, seq)
         end
 
         -- find pair seq[j] < seq[j+1] from the end
@@ -49,8 +49,6 @@ function permutations(array)
             seq[j + i], seq[#seq - i + 1] = seq[#seq - i + 1], seq[j + i]
         end
 
-        return permute(array, seq)
+        return Permute(array, seq), seq
     end
-
-    return iter
 end

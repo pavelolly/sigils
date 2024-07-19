@@ -1,249 +1,56 @@
-require "sigils"
+TEST_Number = 1
 
-
-local function ReportExpectationFailed(msg)
-    print("Expectaion falied:")
-    print("\t"..msg)
-    -- print()
+function TEST_Header(header)
+    header = header or tostring(TEST_Number)
+    io.write(string.format("Test '%s': ", header))
+    TEST_Number = TEST_Number + 1
+    TEST_res = true
 end
 
-local function DeepEquals(obj1, obj2)
-    if not (type(obj1) == "table" and type(obj2) == "table") then
-        return obj1 == obj2
-    end
-
-    if rawlen(obj1) ~= rawlen(obj2) then
-        return false
-    end
-
-    for k, v in next, obj1 do
-        if not DeepEquals(v, obj2[k]) then return false end
-    end
-    return true
-end
-
-local function ExpectTrue(condition, msg)
-    msg = msg or 'Condition is false'
-
-    if not condition then
-        ReportExpectationFailed(msg)
-        return false
-    end
-
-    return true
-end
-
-local function ExpectDeepEquals(obj1, obj2, msg)
-    msg = msg or "objects are not deeply equal"
-    return ExpectTrue(DeepEquals(obj1, obj2), msg)
-end
-
-local function PrintNextTestNumber()
-    test_number = test_number or 1
-    io.write(string.format("Test %d: ", test_number))
-    test_number = test_number + 1
-end
-
-local function TEST_FillEntireFieldManually()
-    PrintNextTestNumber()
-
-    local grid = GetNewGrid(4, 4)
-    local shapes = {Matrix.rotate(Shapes.I, 1),
-                    Matrix.rotate(Shapes.Z, 0),
-                    Matrix.rotate(Shapes.L, 2),
-                    Matrix.rotate(Shapes.J, 1)}
-    local res = ExpectTrue(PlaceShape(grid, shapes[1]), "Could not place I")
-    res = ExpectTrue(PlaceShape(grid, shapes[2], 2, 1), "Could not place Z")
-    res = ExpectTrue(PlaceShape(grid, shapes[3], 2, 3), "Could not place L")
-    res = ExpectTrue(PlaceShape(grid, shapes[4], 3, 1), "Could not place J")
-
-    local expectedgrid = {
-        {1, 1, 1, 1},
-        {2, 2, 3, 3},
-        {4, 2, 2, 3},
-        {4, 4, 4, 3}
-    }
-    res = ExpectTrue(Matrix.equals(grid, expectedgrid), "Grid is not what expected")
-
-    if not res then
-        print("Expected grid:")
-        Matrix.print(expectedgrid)
-        print("But got:")
-        grid:printInfo()
+function TEST_Footer()
+    if TEST_res then
+        print("PASSED")
     else
-        print("Passed")
+        print("FAILED")
+    end
+    print("======================")
+
+    if TEST_ExitOnFail and not TEST_res then os.exit(1) end
+end
+
+function TEST_PrintObjects(expected, real, printFunc)
+    printFunc = printFunc or print
+
+    print("Expected:")
+    printFunc(expected)
+    print("Real:")
+    printFunc(real)
+end
+
+function ExpectTrue(cond, msg)
+    if not cond then
+        print("\nExpectation failed:")
+        print("\t" .. (msg or ""))
+        TEST_res = false
     end
 end
 
-local function TEST_CannotPlaceThirdShapeManually()
-    PrintNextTestNumber()
-
-    local grid = GetNewGrid(4, 4)
-    local shapes = {Matrix.rotate(Shapes.I, 1),
-                    Matrix.rotate(Shapes.Z, 0),
-                    Matrix.rotate(Shapes.L, 2),
-                    Matrix.rotate(Shapes.J, 1)}
-
-    local res = ExpectTrue(PlaceShape(grid, shapes[1]), "Could not place I")
-    res = ExpectTrue(PlaceShape(grid, shapes[2], 2, 1), "Could not place Z")
-    res = ExpectTrue(not PlaceShape(grid, shapes[3], 2, 2), "Could place L")
-    res = ExpectTrue(PlaceShape(grid, shapes[4], 3, 1), "Could not place J")
-
-    local expectedgrid = {
-        {1, 1, 1, 1},
-        {2, 2, 0, 0},
-        {3, 2, 2, 0},
-        {3, 3, 3, 0}
-    }
-    res = ExpectTrue(Matrix.equals(grid, expectedgrid), "Grid is not what expected")
-
-    if not res then
-        print("Expected grid:")
-        Matrix.print(expectedgrid)
-        print("But got:")
-        grid:printInfo()
-    else
-        print("Passed")
-    end
+function ExpectFalse(cond, msg)
+    ExpectTrue(not cond, msg)
 end
 
-local function TEST_FillEntireFieldAutomatically()
-    PrintNextTestNumber()
-
-    local grid = GetNewGrid(4, 4)
-    local shapes = {Matrix.rotate(Shapes.I, 1),
-                    Matrix.rotate(Shapes.Z, 0),
-                    Matrix.rotate(Shapes.L, 2),
-                    Matrix.rotate(Shapes.J, 1)}
-    res = ExpectTrue(PlaceShapes(grid, shapes), "Could not place shapes automatically")
-
-    local expectedgrid = {
-        {1, 1, 1, 1},
-        {2, 2, 3, 3},
-        {4, 2, 2, 3},
-        {4, 4, 4, 3}
-    }
-    if not res then
-        print("Expected grid:")
-        Matrix.print(expectedgrid)
-        print("But got:")
-        grid:printInfo()
-    else
-        print("Passed")
-    end
+function ExpectSame(o1, o2, msg)
+    ExpectTrue(o1 == o2, msg)
 end
 
-local function TEST_CannotPlaceThirdShapeAutomatically()
-    PrintNextTestNumber()
-
-    local grid = GetNewGrid(4, 4)
-    local shapes = {Matrix.rotate(Shapes.I, 1),
-                    Matrix.rotate(Shapes.Z, 0),
-                    Matrix.rotate(Shapes.L, 0),
-                    Matrix.rotate(Shapes.J, 1)}
-    
-    local res = ExpectTrue(not PlaceShapes(grid, shapes), "Could place shapes automatically")
-
-    local expectedgrid = {
-        {1, 1, 1, 1},
-        {2, 2, 0, 0},
-        {0, 2, 2, 0},
-        {0, 0, 0, 0}
-    }
-    res = ExpectTrue(Matrix.equals(grid, expectedgrid), "Grid is not what expected")
-
-    if not res then
-        print("Expected grid:")
-        Matrix.print(expectedgrid)
-        print("But got:")
-        grid:printInfo()
-    else
-        print("Passed")
-    end
+function ExpectNotSame(o1, o2, msg)
+    ExpectFalse(o1 == o2, msg)
 end
 
-local function TEST_FindProperRotation()
-    PrintNextTestNumber()
-
-    local grid = GetNewGrid(4, 4)
-    local shapes = {Shapes.I,
-                    Shapes.Z,
-                    Shapes.L,
-                    Shapes.J}
-
-    local rotations = FindAnyRotation(grid, shapes)
-
-    local expectedRotations = {1, 0, 2, 1}
-    local expectedgrid = {
-        {1, 1, 1, 1},
-        {2, 2, 3, 3},
-        {4, 2, 2, 3},
-        {4, 4, 4, 3}
-    }
-
-    local res = ExpectTrue(Array.equals(rotations, expectedRotations), "Rotations are not what expected")    
-    res = ExpectTrue(Matrix.equals(grid, expectedgrid), "Grid is not what expected")
-
-    if not res then
-        io.write("Expected rotations: "); Array.print(expectedRotations)
-        print("Expected grid: ")
-        Matrix.print(expectedgrid)
-        print("But got: ")
-        io.write("rotations: "); Array.print(rotations)
-        print("grid: ")
-        grid:printInfo()
-    else
-        print("Passed")
-    end
+function ExpectEqual(o1, o2, equalsFunc, msg)
+    ExpectTrue(equalsFunc(o1, o2), msg)
 end
 
-local function TEST_RotateMatrix()
-    local mat = {{1, 2},
-                 {3, 4}}
-
-    local rot1 = {{3, 1},
-                  {4, 2}}
-
-    local rot2 = {{4, 3},
-                  {2, 1}}
-
-    local rot3 = {{2, 4},
-                  {1, 3}}
-
-    local res = ExpectDeepEquals(rot1, Matrix.rotate(mat, 1), "rotate 1 failed")
-    res = ExpectDeepEquals(rot2, Matrix.rotate(mat, 2), "rotate 2 failed")
-    res = ExpectDeepEquals(rot3, Matrix.rotate(mat, 3), "rotate 3 failed")
-    res = ExpectDeepEquals(rot1, Matrix.rotate(mat, 401), "rotate 401 failed")
-    res = ExpectDeepEquals(rot3, Matrix.rotate(mat, -1), "rotate -1 failed")
-
-    if not res then
-        print("mat:")
-        Matrix.print(mat)
-
-        print("rot1:")
-        Matrix.print(Matrix.rotate(mat, 1))
-        
-        print("rot2:")
-        Matrix.print(Matrix.rotate(mat, 2))
-        
-        print("rot3:")
-        Matrix.print(Matrix.rotate(mat, 3))
-
-        print("rot401:")
-        Matrix.print(Matrix.rotate(mat, 401))
-
-        print("rot-1:")
-        Matrix.print(Matrix.rotate(mat, -1))
-    else
-        print("Passed")
-    end
+function ExpectNotEqual(o1, o2, equalsFunc, msg)
+    ExpectFalse(equalsFunc(o1, o2), msg)
 end
-
--- TEST_FillEntireFieldManually()
--- TEST_CannotPlaceThirdShapeManually()
--- TEST_FillEntireFieldAutomatically()
--- TEST_CannotPlaceThirdShapeAutomatically()
--- TEST_FindProperRotation()
--- TEST_FindProperPermutation()
-
--- TEST_RotateMatrix()

@@ -1,136 +1,101 @@
-require "array"
-require "matrix"
-require "permutations"
-require "shapes"
+require "Matrix"
+require "Permutations"
 
-function GetNewGrid(rows, cols)
-    local grid = Matrix.create(rows, cols)
-    grid.TotalArea = rows * cols
-    grid.FreeArea = grid.TotalArea
-    grid.ShapeLabel = "1"
-
-    function grid.nextLabel(grid)
-        grid.ShapeLabel = utf8.char(utf8.codepoint(grid.ShapeLabel) + 1)
-        return grid.ShapeLabel
-    end
-
-    function grid.prevLabel(grid)
-        if grid.ShapeLabel ~= "1" then
-            grid.ShapeLabel = utf8.char(utf8.codepoint(grid.ShapeLabel) - 1)
-        end
-        return grid.ShapeLabel
-    end
-
-    function grid.printInfo(grid)
-        Matrix.print(grid)
-        print("TotalArea", grid.TotalArea)
-        print("FreeArea", grid.FreeArea)
-        print("ShapeLabel", grid.ShapeLabel)
-    end
-
-    function grid.clear(grid)
-        Matrix.fill(grid, 0)
-        grid.FreeArea = grid.TotalArea
-        grid.ShapeLabel = "1"
-    end
-
-    return grid
-end
-
-function RemoveLastShape(grid)
-    local count = 0
-    grid:prevLabel()
-    for i = 1, #grid do
-        for j = 1, #(grid[1]) do
-            if grid[i][j] == grid.ShapeLabel then
-                grid[i][j] = 0
-                count = count + 1
-            end
-        end
-    end
-    grid.FreeArea = grid.FreeArea + count
-end
+require "Grid"
+require "Shapes"
 
 function PlaceShape(grid, shape, row, col)
+    if shape.Area > grid.FreeArea then
+        return false
+    end
+
     row = row or 1
     col = col or 1
 
-    local count = 0
+    local blocksPlaced = 0
+    local blocks = {}
     for i, shape_row in ipairs(shape) do
         for j, elem in ipairs(shape_row) do
-            local grid_row = row + i - 1
-            local grid_col = col + j - 1
-
-            if (not Matrix.inBounds(grid, grid_row, grid_col)) or (grid[grid_row][grid_col] ~= 0 and elem ~= 0) then
-                -- pretend like you have placed some shape
-                grid:nextLabel()
-                grid.FreeArea = grid.FreeArea - count
-                -- then remove it
-                RemoveLastShape(grid)
-                return false
-            end
-            
             if elem ~= 0 then
-                grid[grid_row][grid_col] = grid.ShapeLabel
-                count = count + 1
+                local grid_row = row + i - 1
+                local grid_col = col + j - 1
+
+                if (not Matrix.inBounds(grid, grid_row, grid_col)) or grid[grid_row][grid_col] ~= grid.DefaultLabel then
+                    -- undo changes
+                    for i, block in ipairs(blocks) do
+                        grid[block.row][block.col] = grid.DefaultLabel
+                    end
+                    return false
+                end
+                
+                grid[grid_row][grid_col] = grid.CurrentLabel
+    
+                table.insert(blocks, {row = grid_row, col = grid_col})
+                blocksPlaced = blocksPlaced + 1
             end
         end
     end
 
-    grid:nextLabel()
-    grid.FreeArea = grid.FreeArea - count
-    return true
+    if blocksPlaced > 0 then
+        grid:nextLabel()
+        grid.FreeArea = grid.FreeArea - blocksPlaced
+        return true
+    else return false end
 end
 
-function NextFreeSpot(grid)
-    for i, row in ipairs(grid) do
-        for j, elem in ipairs(row) do
-            if elem == 0 then return i, j end
-        end
-    end
-    return nil
+function NextFreeBlock(grid)
+    return Matrix.find(grid, grid.DefaultLabel)
 end
 
 function PlaceShapes(grid, shapes)
-    if #shapes * Shapes.Area ~= grid.FreeArea then return false end
+    if Shapes.area(shapes) ~= grid.FreeArea then return false end
     for i, shape in ipairs(shapes) do
-        row, col = NextFreeSpot(grid)
-        if not row then return false end
-        local shape_col = 1
-        while shape[1][shape_col] == 0 do
-            shape_col = shape_col + 1
-            col = col > 0 and col - 1 or 0
+        row, col = NextFreeBlock(grid)
+        if not row then return false end -- probably impossible to return here as it would imply that Shapes.area(shapes) ~= grid.FreeArea
+                                         -- which is false already
+        local shape_origin_row, shape_origin_col = Shapes.getOrigin(shape)
+        if shape_origin_row then
+            -- we want to place shape such that its origin is at the free block found earlier
+            row = row - shape_origin_row + 1
+            col = col - shape_origin_col + 1
+            if not PlaceShape(grid, shape, row, col) then return false end
         end
-        if not PlaceShape(grid, shape, row, col) then return false end
     end
     return true
 end
 
-function RotateShapes(shapes)
-    local rotations
-    shapes = Array.copy(shapes)
-
-    local rotate = function(shape, n)
-        local rshape = Matrix.rotate(shape, n)
-        rshape.nrotations = shape.nrotations
-        return rshape
+-- ) you can use this in a for loop:
+--   for rshapes, rotations in RotateShapes(shapes) do end
+-- ) to properly save and use 'rshapes' and 'rotations' you should copy them
+--   (iterator function returns referenses to its inner varibles used for iteration purposes)
+--   DO NOT MODIFY RETURNED VALUES!!!
+function RotateShapes(shapes, rotations)
+    local rshapes = {}
+    if rotations and #shapes == #rotations then
+        for i, shape in ipairs(shapes) do
+            rshapes[i] = Shapes.rotate(shape, rotations[i])
+        end
+    else
+        rotations = {}
+        for i, shape in ipairs(shapes) do
+            rshapes[i] = Shapes.copy(shape)
+        end
     end
 
     return function()
-        if not rotations then
-            rotations = {}
-            for i = 1,#shapes do
+        if not next(rotations) then
+            for i = 1,#rshapes do
                 rotations[i] = 0
             end
         else
-            for i = #shapes,1,-1 do
-                if rotations[i] < shapes[i].nrotations - 1 then
+            for i = #rshapes,1,-1 do
+                if rotations[i] < rshapes[i].UniqueRotationsCount - 1 then
                     rotations[i] = rotations[i] + 1
-                    shapes[i] = rotate(shapes[i], 1)
+                    rshapes[i] = Shapes.rotate(rshapes[i], 1)
                     break
                 end
                 -- rotate back to initial state
-                shapes[i] = rotate(shapes[i], -rotations[i])
+                rshapes[i] = Shapes.rotate(rshapes[i], -rotations[i])
                 rotations[i] = 0
 
                 if i == 1 then
@@ -142,52 +107,57 @@ function RotateShapes(shapes)
         if (not rotations) or (not next(rotations)) then
             return nil
         else
-            return shapes, rotations
+            return rshapes, rotations
         end
     end
 end
 
-function PlaceShapesRotated(grid, shapes, rotations)
-    if #shapes * Shapes.Area ~= grid.FreeArea then return false end
-
-    local rshapes = Array.copy(shapes)
-    for i, nrot in ipairs(rotations) do
-        rshapes[i] = Matrix.rotate(rshapes[i], nrot)
+-- check all rotations for shapes and yield every one that fits into grid
+function SuitableRotations(grid, shapes)
+    if Shapes.area(shapes) ~= grid.FreeArea then
+        return function() return nil end
     end
 
-    return PlaceShapes(grid, rshapes)
+    local last_rotations
+    return function()
+        for rshapes, rotations in RotateShapes(shapes, last_rotations) do
+            if PlaceShapes(grid, rshapes) then
+
+                -- DEBUG
+                -- print("\nFound rotation:")
+                -- Array.print(rotations)
+                -- print("Shapes:")
+                -- Shapes.printMany(rshapes)
+
+                last_rotations = rotations
+                return Array.copy(rotations)
+            end
+            Grid.clear(grid)
+        end
+        return nil
+    end
 end
 
-function FindAnyRotation(grid, shapes)
-    if #shapes * Shapes.Area ~= grid.FreeArea then return false end
-
-    local count = 1
-    for rotated_shapes, rotations in RotateShapes(shapes) do
-        grid:clear()
-        local res = PlaceShapes(grid, rotated_shapes)
-        if res then
-            -- io.write("Rotations enumerated:", count, "\n")
-            return rotations
-        end
-        count = count + 1
+-- check every permutation of shapes and every posiible rotations for that permutation
+-- yield every suitable permutation with suitable rotations
+function SuitablePermutations(grid, shapes)
+    if Shapes.area(shapes) ~= grid.FreeArea then
+        return function() return nil end
     end
-    -- io.write("Rotations enumerated:", count, "\n")
-    return nil
-end
 
-function FindAnyPlacement(grid, shapes)
-    if #shapes * Shapes.Area ~= grid.FreeArea then return false end
-
-    local count = 1
-    for order in permutations(shapes) do
-        grid:clear()
-        local rotation = FindAnyRotation(grid, order)
-        if rotation then
-            io.write("Pemutaions enumerated:", count, "\n")
-            return order, rotation
+    local last_permutation
+    return function()
+        for pshapes, permutation in Permutations(shapes, last_permutation) do
+            local permutationRotations = {}
+            for rotations in SuitableRotations(grid, pshapes) do
+                table.insert(permutationRotations, Array.copy(rotations))
+            end
+            if next(permutationRotations) then
+                last_permutation = permutation
+                return Array.copy(permutation), permutationRotations
+            end
+            Grid.clear(grid)
         end
-        count = count + 1
+        return nil
     end
-    io.write("Pemutaions enumerated:", count, "\n")
-    return nil
 end

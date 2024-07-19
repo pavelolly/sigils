@@ -6,7 +6,20 @@ function Array.reverse(array)
     end
 end
 
+function Array.reversed(array)
+    local new = {}
+    for i, e in ipairs(array) do
+        new[#array - i + 1] = e
+    end
+    return new
+end
+
 function Array.print(array)
+    if type(array) ~= "table" then
+        print(string.format("Not an array (but '%s')", type(mat)))
+        return
+    end
+
     print(table.unpack(array))
 end
 
@@ -15,6 +28,8 @@ function Array.copy(array)
 end
 
 function Array.equals(array, other)
+    -- if type(array) ~= "table" or type(other) ~= "table" then return false end
+
     if #array ~= #other then
         return false
     end
@@ -46,4 +61,20 @@ function Array.shuffle(array)
         j = math.random(i)
         array[i], array[j] = array[j], array[i]
     end
+end
+
+function Array.find(array, value)
+    for i, e in ipairs(array) do
+        if e == value then return i end
+    end
+    return nil
+end
+
+function Array.findIf(array, func)
+    if type(func) ~= "function" then return nil end
+
+    for i, e in ipairs(array) do
+        if func(e) then return i end
+    end
+    return nil
 end

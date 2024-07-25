@@ -503,6 +503,7 @@ function TEST_SuitablePermutations_1()
                 Shapes.printMany(rp)
                 io.write("\n")
                 io.write("does not fit into grid")
+                ExpectedTrue(false, "found permutaion does not actually fir into grid")
                 goto footer
             end
             Grid.clear(grid)
@@ -568,6 +569,7 @@ function TEST_SuitablePermutations_2()
                 Shapes.printMany(rp)
                 io.write("\n")
                 io.write("does not fit into grid")
+                ExpectedTrue(false, "found permutaion does not actually fir into grid")
                 goto footer
             end
             Grid.clear(grid)

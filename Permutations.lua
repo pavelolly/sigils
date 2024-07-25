@@ -8,6 +8,36 @@ function Permute(array, permutation)
     return new_array
 end
 
+function NextPermutation()
+    -- find pair seq[j] < seq[j+1] from the end
+    local j
+    for i = (#seq - 1),1,-1 do
+        if seq[i] < seq[i + 1] then
+            j = i
+            break
+        end
+    end
+    
+    -- if no such pair we're done
+    if not j then return nil end
+
+    -- find largest l > j such that seq[l] > seq[j]
+    local l = j + 1
+    for i = j + 2,#seq do
+        if seq[i] > seq[j] then
+            l = i
+        end
+    end
+
+    -- swap seq[j] and seq[l]
+    seq[j], seq[l] = seq[l], seq[j]
+    
+    -- reverse seq[j+1]..seq[#seq]
+    for i = 1, (#seq - j) / 2 do
+        seq[j + i], seq[#seq - i + 1] = seq[#seq - i + 1], seq[j + i]
+    end
+end
+
 --
 -- https://ru.wikipedia.org/wiki/Алгоритм_Нарайаны
 --
@@ -21,33 +51,7 @@ function Permutations(array, seq)
             return Permute(array, seq)
         end
 
-        -- find pair seq[j] < seq[j+1] from the end
-        local j
-        for i = (#seq - 1),1,-1 do
-            if seq[i] < seq[i + 1] then
-                j = i
-                break
-            end
-        end
-        
-        -- if no such pair we're done
-        if not j then return nil end
-
-        -- find largest l > j such that seq[l] > seq[j]
-        local l = j + 1
-        for i = j + 2,#seq do
-            if seq[i] > seq[j] then
-                l = i
-            end
-        end
-
-        -- swap seq[j] and seq[i]
-        seq[j], seq[l] = seq[l], seq[j]
-        
-        -- reverse seq[j+1]..seq[#seq]
-        for i = 1, (#seq - j) / 2 do
-            seq[j + i], seq[#seq - i + 1] = seq[#seq - i + 1], seq[j + i]
-        end
+        NextPermutation()
 
         return Permute(array, seq), seq
     end

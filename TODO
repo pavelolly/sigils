@@ -1,6 +1,7 @@
 - return copied arrays (don't make users copy themselves) ...probably
 - try to reduce copying
-- omptimization: if you have found permutaion --> you found up to 4 permutaions (if there is no symmetry and grid is square)
+- optimization: if you have found permutaion --> you found up to 4 permutaions (if there is no symmetry and grid is square)
   1 1 1 2 ------------------> 2 2 2 1
   1 2 2 2    automatically    2 1 1 1
+- optimization: ignore repeated permutations
   

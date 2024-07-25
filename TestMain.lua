@@ -494,7 +494,22 @@ function TEST_SuitablePermutations_1()
     Array.print(expectedRotations)
 
 ::found::
+    for p, rs in pairs(permutations) do
+        for i, r in ipairs(rs) do
+            rp = Shapes.rotateMany(Permute(shapes, p), r)
+            if not PlaceShapes(grid, rp) then
+                io.write("Permutaion: "); Array.print(p)
+                io.write("Rotation: "); Array.print(rs)
+                Shapes.printMany(rp)
+                io.write("\n")
+                io.write("does not fit into grid")
+                goto footer
+            end
+            Grid.clear(grid)
+        end
+    end
 
+::footer::
     TEST_Footer()
 end
 
@@ -544,6 +559,22 @@ function TEST_SuitablePermutations_2()
     Array.print(expectedRotations)
 
 ::found::
+    for p, rs in pairs(permutations) do
+        for i, r in ipairs(rs) do
+            rp = Shapes.rotateMany(Permute(shapes, p), r)
+            if not PlaceShapes(grid, rp) then
+                io.write("Permutaion: "); Array.print(p)
+                io.write("Rotation: "); Array.print(rs)
+                Shapes.printMany(rp)
+                io.write("\n")
+                io.write("does not fit into grid")
+                goto footer
+            end
+            Grid.clear(grid)
+        end
+    end
+
+::footer::
 
     TEST_Footer()
 end

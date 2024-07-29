@@ -33,14 +33,7 @@ function Matrix.print(mat)
 end
 
 function Matrix.copy(mat)
-    local copy = {}
-    for i, row in ipairs(mat) do
-        copy[i] = {}
-        for j, elem in ipairs(row) do
-            copy[i][j] = elem
-        end
-    end
-    return copy
+    return Array.deepCopy(mat)
 end
 
 function Matrix.equals(mat1, mat2)

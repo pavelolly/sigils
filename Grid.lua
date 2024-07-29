@@ -33,16 +33,6 @@ function Grid.print(grid)
     print("CurrentLabel:", grid.CurrentLabel)
 end
 
-function Grid.copy(grid)
-    local new = {table.unpack(grid)}
-    for k, v in pairs(grid) do
-        if type(k) ~= "number" then
-            new[k] = v
-        end
-    end
-    return new
-end
-
 function Grid.clear(grid)
     Matrix.fill(grid, grid.DefaultLabel)
     grid.FreeArea = grid.Area

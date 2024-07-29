@@ -1,4 +1,5 @@
 require "Matrix"
+require "Permutations"
 
 Shapes = {
     L = {
@@ -104,19 +105,21 @@ function Shapes.printMany(shapes)
     end
 end
 
-function Shapes.copy(shape)
-    return {UniqueRotationsCount = shape.UniqueRotationsCount, Area = shape.Area; table.unpack(Matrix.copy(shape))}
-end
-
 function Shapes.rotate(shape, nrotations)
-    return {UniqueRotationsCount = shape.UniqueRotationsCount, Area = shape.Area; table.unpack(Matrix.rotate(shape, nrotations))}
+    local mat = Matrix.rotate(shape, nrotations)
+    local rshape = DeepCopy(shape)
+    local maxlen = (#rshape > #mat) and #rshape or #mat
+    for i = 1,maxlen do
+        rshape[i] = mat[i]
+    end
+    return rshape
 end
 
 function Shapes.rotateMany(shapes, rotations)
     if #shapes ~= #rotations then error("lengths of shapes and rotations differ") end
     local rshapes = {}
     for i = 1,#shapes do
-        rshapes[i] = Shapes.rotate(Shapes.copy(shapes[i]), rotations[i])
+        rshapes[i] = Shapes.rotate(shapes[i], rotations[i])
     end
     return rshapes
 end

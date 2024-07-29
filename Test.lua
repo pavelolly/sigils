@@ -2,7 +2,7 @@ TEST_Number = 1
 
 function TEST_Header(header)
     header = header or tostring(TEST_Number)
-    io.write(string.format("Test '%s': ", header))
+    io.write(string.format("Test '%s':\n", header))
     TEST_Number = TEST_Number + 1
     TEST_res = true
 end

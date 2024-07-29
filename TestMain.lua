@@ -93,6 +93,7 @@ function TEST_Shapes_rotate()
     local Z = Shapes.Z
     local L = Shapes.rotate(Shapes.L, 2)
     local J = Shapes.rotate(Shapes.J, 1)
+    local T = Shapes.rotate(Shapes.T, 1)
 
     ExpectEqual(I, {{1, 1, 1, 1}}, Matrix.equals, "I rotation wrong")
     ExpectEqual(Z, Shapes.Z, Matrix.equals, "Z rotation wrong")
@@ -101,6 +102,9 @@ function TEST_Shapes_rotate()
                     {0, 1}}, Matrix.equals, "L rotation wrong")
     ExpectEqual(J, {{1, 0, 0},
                     {1, 1, 1}}, Matrix.equals, "J rotation wrong")
+    ExpectEqual(T, {{0, 1},
+                    {1, 1},
+                    {0, 1}}, Matrix.equals, "T rotation wrong")
 
     ExpectEqual(Matrix.rotate(Shapes.T, 3), Matrix.rotate(Shapes.T, -1), Matrix.equals, "Rotation 3 and rotation -1 are not the same rotations")
 
@@ -121,6 +125,9 @@ function TEST_Shapes_rotate()
                            {0, 1}}, L, Matrix.print)
         TEST_PrintObjects({{1, 0, 0},
                            {1, 1, 1}}, J, Matrix.print)
+        TEST_PrintObjects({{0, 1},
+                           {1, 1},
+                           {0, 1}}, T, Matrix.print)
         TEST_PrintObjects(Matrix.rotate(Shapes.T, 3), Matrix.rotate(Shapes.T, -1), Matrix.print)
     end
 

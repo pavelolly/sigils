@@ -8,7 +8,10 @@ function Permute(array, permutation)
     return new_array
 end
 
-function NextPermutation()
+--
+-- https://ru.wikipedia.org/wiki/Алгоритм_Нарайаны
+--
+function NextPermutation(seq)
     -- find pair seq[j] < seq[j+1] from the end
     local j
     for i = (#seq - 1),1,-1 do
@@ -19,7 +22,7 @@ function NextPermutation()
     end
     
     -- if no such pair we're done
-    if not j then return nil end
+    if not j then return false end
 
     -- find largest l > j such that seq[l] > seq[j]
     local l = j + 1
@@ -36,11 +39,10 @@ function NextPermutation()
     for i = 1, (#seq - j) / 2 do
         seq[j + i], seq[#seq - i + 1] = seq[#seq - i + 1], seq[j + i]
     end
+
+    return true
 end
 
---
--- https://ru.wikipedia.org/wiki/Алгоритм_Нарайаны
---
 function Permutations(array, seq)
     if seq then seq = Array.copy(seq) end
     return function()
@@ -51,7 +53,7 @@ function Permutations(array, seq)
             return Permute(array, seq)
         end
 
-        NextPermutation()
+        if not NextPermutation(seq) then return nil end
 
         return Permute(array, seq), seq
     end

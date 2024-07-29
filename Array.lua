@@ -1,3 +1,5 @@
+require "DeepCopy"
+
 Array = {}
 
 function Array.reverse(array)
@@ -25,6 +27,14 @@ end
 
 function Array.copy(array)
     return {table.unpack(array)}
+end
+
+function Array.deepCopy(array)
+    local new_array = {}
+    for i, e in ipairs(array) do
+        new_array[i] = DeepCopy(e)
+    end
+    return new_array
 end
 
 function Array.equals(array, other)

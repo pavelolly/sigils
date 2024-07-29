@@ -59,6 +59,8 @@ function PlaceShapes(grid, shapes)
             row = row - shape_origin_row + 1
             col = col - shape_origin_col + 1
             if not PlaceShape(grid, shape, row, col) then return false end
+            -- Matrix.print(grid)
+            -- print("==================")
         end
     end
     return true
@@ -78,7 +80,7 @@ function RotateShapes(shapes, rotations)
     else
         rotations = {}
         for i, shape in ipairs(shapes) do
-            rshapes[i] = Shapes.copy(shape)
+            rshapes[i] = DeepCopy(shape)
         end
     end
 

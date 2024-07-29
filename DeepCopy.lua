@@ -1,4 +1,4 @@
-function DeepCopy(o)
+function DeepCopy(obj)
     if type(obj) ~= 'table' then
         return obj
     end

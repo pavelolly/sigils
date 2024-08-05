@@ -11,11 +11,11 @@ end
 --
 -- https://ru.wikipedia.org/wiki/Алгоритм_Нарайаны
 --
-function NextPermutation(seq)
-    -- find pair seq[j] < seq[j+1] from the end
+function NextPermutation(prev_per)
+    -- find pair prev_per[j] < prev_per[j+1] from the end
     local j
-    for i = (#seq - 1),1,-1 do
-        if seq[i] < seq[i + 1] then
+    for i = (#prev_per - 1),1,-1 do
+        if prev_per[i] < prev_per[i + 1] then
             j = i
             break
         end
@@ -24,37 +24,40 @@ function NextPermutation(seq)
     -- if no such pair we're done
     if not j then return false end
 
-    -- find largest l > j such that seq[l] > seq[j]
+    -- find largest l > j such that prev_per[l] > prev_per[j]
     local l = j + 1
-    for i = j + 2,#seq do
-        if seq[i] > seq[j] then
+    for i = j + 2,#prev_per do
+        if prev_per[i] > prev_per[j] then
             l = i
         end
     end
 
-    -- swap seq[j] and seq[l]
-    seq[j], seq[l] = seq[l], seq[j]
+    -- swap prev_per[j] and prev_per[l]
+    prev_per[j], prev_per[l] = prev_per[l], prev_per[j]
     
-    -- reverse seq[j+1]..seq[#seq]
-    for i = 1, (#seq - j) / 2 do
-        seq[j + i], seq[#seq - i + 1] = seq[#seq - i + 1], seq[j + i]
+    -- reverse prev_per[j+1]..prev_per[#prev_per]
+    for i = 1, (#prev_per - j) / 2 do
+        prev_per[j + i], prev_per[#prev_per - i + 1] = prev_per[#prev_per - i + 1], prev_per[j + i]
     end
 
     return true
 end
 
-function Permutations(array, seq)
-    if seq then seq = Array.copy(seq) end
+function Permutations(array, prev_per)
+    -- save prev_per locally
+    if prev_per then prev_per = Array.copy(prev_per) end
+
     return function()
-        if (not seq) then
-            seq = {}
-            for i=1,#array do seq[i] = i end
-            if (not next(seq)) then return nil end
-            return Permute(array, seq)
+        if (not prev_per) then
+            prev_per = {}
+            for i=1,#array do prev_per[i] = i end
+            if (not next(prev_per)) then return nil end
+            return Permute(array, prev_per)
         end
 
-        if not NextPermutation(seq) then return nil end
+        if not NextPermutation(prev_per) then return nil end
 
-        return Permute(array, seq), seq
+        return Permute(array, prev_per),
+               Array.copy(prev_per) -- return copy here to prevent affecting the iteration by modifying this value
     end
 end

@@ -4,8 +4,8 @@ Grid = {}
 
 function Grid.create(rows, cols)
     local grid = Matrix.create(rows, cols, ".")
-    grid.Area     = rows * cols
-    grid.FreeArea = grid.Area
+    grid.TotalArea = rows * cols
+    grid.FreeArea  = grid.TotalArea
     grid.DefaultLabel = "."
     grid.InitialLabel = "1"
     grid.CurrentLabel = grid.InitialLabel
@@ -35,6 +35,6 @@ end
 
 function Grid.clear(grid)
     Matrix.fill(grid, grid.DefaultLabel)
-    grid.FreeArea = grid.Area
+    grid.FreeArea = grid.TotalArea
     grid.CurrentLabel = grid.InitialLabel
 end

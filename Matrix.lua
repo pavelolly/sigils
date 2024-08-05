@@ -3,7 +3,9 @@ require "Array"
 Matrix = {}
 
 function Matrix.create(rows, cols, value)
-    value = value or 0
+    -- not 'value = value or 0' because i want to have false as matrix entry
+    if value == nil then value = 0 end
+
     mat = {}
     for i = 1,rows do
         mat[i] = {}
@@ -24,7 +26,7 @@ function Matrix.print(mat)
     end
 
     for i, row in ipairs(mat) do
-        -- should check type(row) == "table"
+        -- should probably check type(row) == "table"
         for j, elem in ipairs(row) do
             io.write(elem .. " ")
         end

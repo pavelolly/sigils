@@ -296,7 +296,7 @@ function TEST_RotateShapes_Rotations()
     }
 
     local i = 1
-    for rshapes, rotations in RotateShapes({I, L}) do
+    for rshapes, rotations in RotatedShapes({I, L}) do
         ExpectEqual(rotations, expectedRotations[i], Array.equals, "Rotation #"..i.." is wrong")
         if not TEST_res then
             TEST_PrintObjects(expectedRotations[i], rotations, Array.print)
@@ -331,7 +331,7 @@ function TEST_RotateShapes_Rotated_Shapes()
     end
 
     local i = 1
-    for rshapes, rotations in RotateShapes({I, L}) do
+    for rshapes, rotations in RotatedShapes({I, L}) do
         ExpectEqual(rshapes, expectedRotatedShapes[i],
                     function (shapes1, shapes2)
                         if #shapes1 ~= #shapes2 then return false end
@@ -373,7 +373,7 @@ function TEST_RotateShapes_NonEmptyInitialRotations()
 
     local i = 1
     -- need AssertTrue here
-    for rshapes, rotations in RotateShapes({I, L}, {0, 2}) do
+    for rshapes, rotations in RotatedShapes({I, L}, {0, 2}) do
         ExpectEqual(rotations, expectedRotations[i], Array.equals, "Rotation #"..i.." is wrong")
         if not TEST_res then
             TEST_PrintObjects(expectedRotations[i], rotations, Array.print)
@@ -409,12 +409,15 @@ function TEST_SuitableRotations_1()
 
     for i, rotations in ipairs(suitableRotations) do
         ExpectTrue(PlaceShapes(grid, Shapes.rotateMany({I, Z, L, J}, rotations)), "Failed to place rotation #"..i)
+        if not TEST_res then
+            TEST_PrintObjects(GRID_4x4_SUCCESS_1, grid, Matrix.print)
+        end
+        Grid.clear(grid)
     end
 
     if not TEST_res then
         print("Expected to find:")
         Array.print({1, 0, 2, 1})
-        TEST_PrintObjects(grid, GRID_4x4_SUCCESS_1, Matrix.print)
     end
 
     TEST_Footer()
@@ -506,11 +509,12 @@ function TEST_SuitablePermutations_1()
             rp = Shapes.rotateMany(Permute(shapes, p), r)
             if not PlaceShapes(grid, rp) then
                 io.write("Permutaion: "); Array.print(p)
-                io.write("Rotation: "); Array.print(rs)
+                io.write("Rotation: "); Array.print(r)
                 Shapes.printMany(rp)
                 io.write("\n")
                 io.write("does not fit into grid")
-                ExpectedTrue(false, "found permutaion does not actually fir into grid")
+                ExpectTrue(false, "found permutaion does not actually fit into grid")
+                Grid.print(grid)
                 goto footer
             end
             Grid.clear(grid)

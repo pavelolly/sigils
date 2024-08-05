@@ -1,3 +1,4 @@
+require "DeepCopy"
 require "Matrix"
 require "Permutations"
 
@@ -12,7 +13,6 @@ function PlaceShape(grid, shape, row, col)
     row = row or 1
     col = col or 1
 
-    local blocksPlaced = 0
     local blocks = {}
     for i, shape_row in ipairs(shape) do
         for j, elem in ipairs(shape_row) do
@@ -31,16 +31,17 @@ function PlaceShape(grid, shape, row, col)
                 grid[grid_row][grid_col] = grid.CurrentLabel
     
                 table.insert(blocks, {row = grid_row, col = grid_col})
-                blocksPlaced = blocksPlaced + 1
             end
         end
     end
 
-    if blocksPlaced > 0 then
+    if #blocks > 0 then
         grid:nextLabel()
-        grid.FreeArea = grid.FreeArea - blocksPlaced
+        grid.FreeArea = grid.FreeArea - #blocks
         return true
-    else return false end
+    end
+    
+    return false
 end
 
 function NextFreeBlock(grid)
@@ -66,51 +67,47 @@ function PlaceShapes(grid, shapes)
     return true
 end
 
--- ) you can use this in a for loop:
---   for rshapes, rotations in RotateShapes(shapes) do end
--- ) to properly save and use 'rshapes' and 'rotations' you should copy them
---   (iterator function returns referenses to its inner varibles used for iteration purposes)
---   DO NOT MODIFY RETURNED VALUES!!!
-function RotateShapes(shapes, rotations)
+-- you can use this in a for loop:
+-- for rshapes, rotations in RotatedShapes(shapes) do end
+function RotatedShapes(shapes, prev_rotations)
     local rshapes = {}
-    if rotations and #shapes == #rotations then
+    if prev_rotations and #shapes == #prev_rotations then
         for i, shape in ipairs(shapes) do
-            rshapes[i] = Shapes.rotate(shape, rotations[i])
+            rshapes[i] = Shapes.rotate(shape, prev_rotations[i])
         end
     else
-        rotations = {}
         for i, shape in ipairs(shapes) do
             rshapes[i] = DeepCopy(shape)
         end
     end
 
     return function()
-        if not next(rotations) then
+        if not prev_rotations then
+            prev_rotations = {}
             for i = 1,#rshapes do
-                rotations[i] = 0
+                prev_rotations[i] = 0
             end
         else
             for i = #rshapes,1,-1 do
-                if rotations[i] < rshapes[i].UniqueRotationsCount - 1 then
-                    rotations[i] = rotations[i] + 1
+                if prev_rotations[i] < rshapes[i].UniqueRotationsCount - 1 then
+                    prev_rotations[i] = prev_rotations[i] + 1
                     rshapes[i] = Shapes.rotate(rshapes[i], 1)
                     break
                 end
                 -- rotate back to initial state
-                rshapes[i] = Shapes.rotate(rshapes[i], -rotations[i])
-                rotations[i] = 0
+                rshapes[i] = Shapes.rotate(rshapes[i], -prev_rotations[i])
+                prev_rotations[i] = 0
 
                 if i == 1 then
-                    rotations = nil
+                    prev_rotations = nil
                 end
             end
         end
 
-        if (not rotations) or (not next(rotations)) then
+        if (not prev_rotations) or (not next(prev_rotations)) then
             return nil
-        else
-            return rshapes, rotations
         end
+        return Array.deepCopy(rshapes), Array.copy(prev_rotations)
     end
 end
 
@@ -120,10 +117,15 @@ function SuitableRotations(grid, shapes)
         return function() return nil end
     end
 
+    grid = DeepCopy(grid)
+    local grid_copy = DeepCopy(grid)
     local last_rotations
     return function()
-        for rshapes, rotations in RotateShapes(shapes, last_rotations) do
-            if PlaceShapes(grid, rshapes) then
+        for rshapes, rotations in RotatedShapes(shapes, last_rotations) do
+            local could_place = PlaceShapes(grid, rshapes)
+            grid = DeepCopy(grid_copy)
+
+            if could_place then
 
                 -- DEBUG
                 -- print("\nFound rotation:")
@@ -131,10 +133,9 @@ function SuitableRotations(grid, shapes)
                 -- print("Shapes:")
                 -- Shapes.printMany(rshapes)
 
-                last_rotations = rotations
-                return Array.copy(rotations)
+                last_rotations = Array.copy(rotations)
+                return rotations
             end
-            Grid.clear(grid)
         end
         return nil
     end
@@ -152,13 +153,12 @@ function SuitablePermutations(grid, shapes)
         for pshapes, permutation in Permutations(shapes, last_permutation) do
             local permutationRotations = {}
             for rotations in SuitableRotations(grid, pshapes) do
-                table.insert(permutationRotations, Array.copy(rotations))
+                table.insert(permutationRotations, rotations)
             end
             if next(permutationRotations) then
                 last_permutation = permutation
-                return Array.copy(permutation), permutationRotations
+                return permutation, permutationRotations
             end
-            Grid.clear(grid)
         end
         return nil
     end

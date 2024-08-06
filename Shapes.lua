@@ -64,12 +64,6 @@ function Shapes.print(shape)
     print("Area:", shape.Area)
 end
 
-for k,v in pairs(Shapes) do
-    if type(v) == "table" then 
-        setmetatable(v, {__eq = DeepCopy, print = Shapes.print})
-    end
-end
-
 -- pretty
 -- 1 1    0 1 1   1 1 1 1    1
 -- 1 1    1 1 0              1
@@ -149,4 +143,35 @@ end
 --
 function Shapes.getOrigin(shape)
     return Matrix.findIf(shape, function(elem) return elem ~= 0 end)
+end
+
+
+-- returns true if shape1 ans shape2 are the same shape up to rotation meaning:
+-- 0 0 1         1 0 
+-- 1 1 1   and   1 0   are the same
+--               1 1
+function Shapes.same(shape1, shape2)
+    if shape1.Area ~= shape2.Area or shape1.UniqueRotationsCount ~= shape2.UniqueRotationsCount then
+        return false
+    end
+
+    -- eternal loop guard
+    assert(type(shape2.UniqueRotationsCount) == "number" and shape2.UniqueRotationsCount > 0,
+           "bad shape2.UniqueRotationsCount")
+
+    local nrotations = 0
+    repeat
+        if Matrix.equals(shape1, shape2) then
+            return true
+        end
+        shape1 = Matrix.rotate(shape1, 1)
+        nrotations = nrotations + 1
+    until nrotations >= shape2.UniqueRotationsCount
+    return false
+end
+
+for k,v in pairs(Shapes) do
+    if type(v) == "table" then 
+        setmetatable(v, {__eq = Shapes.same, print = Shapes.print})
+    end
 end

@@ -52,11 +52,52 @@ function Permutations(array, prev_per)
             prev_per = {}
             for i=1,#array do prev_per[i] = i end
             if (not next(prev_per)) then return nil end
-            return Permute(array, prev_per), Array.copy(prev_per)
+            return Array.copy(array), Array.copy(prev_per)
         end
         
         if not NextPermutation(prev_per) then return nil end
+        
         return Permute(array, prev_per),
                Array.copy(prev_per) -- return copy here to prevent affecting the iteration by modifying this value
+    end
+end
+
+function PermutationsUnique(array, prev_per)
+    -- save prev_per locally
+    if prev_per then prev_per = Array.copy(prev_per) end
+
+    return function()
+        if (not prev_per) then
+            prev_per = {}
+            local seen = {}
+
+            for i = 1,#array do
+                -- find object in seen table
+                local idx
+                for k, v in pairs(seen) do
+                    if v == array[i] then
+                        idx = k
+                        break
+                    end
+                end
+
+                -- if found set first met index for that object
+                -- else create new entry in seen table and set new index
+                if idx then
+                    prev_per[i] = idx
+                else
+                    seen[i] = array[i]
+                    prev_per[i] = i
+                end
+            end
+
+            if (not next(prev_per)) then return nil end
+            return Array.copy(array), Array.copy(prev_per)
+        end
+        
+        if not NextPermutation(prev_per) then return nil end
+
+        return Permute(array, prev_per),
+               Array.copy(prev_per) 
     end
 end

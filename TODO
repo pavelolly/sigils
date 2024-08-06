@@ -1,6 +1,10 @@
-- optimization: if you have found permutaion --> you found up to 4 permutaions (if there is no symmetry and grid is square)
-  1 1 1 2 ------------------> 2 2 2 1
-  1 2 2 2    automatically    2 1 1 1
-- optimization: ignore repeated permutations
-- optimization: smarter rotations
+- iterate only over unique permutations
+  !! must be huge optimization 
+
+- iterate rotations starting from the beginning of the sequence
+  !! preparation for the next step
+  
+- if some shape in permutation cannot be placed in any way - skip the whole bunch of permutations starting with particular "prefix"
+  if let's say in {1 2 3 4} shape #2 cannot be placed then i don't need all of the permutations starting with {1, 2}
+  !! must be huge optimization
   

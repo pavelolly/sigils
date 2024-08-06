@@ -4,8 +4,6 @@ require "Array"
 require "Matrix"
 require "Sigils"
 
-Test.exitOnExpectationFailure = true
-
 function TEST_SuitableRotationsExhaustive(grid, shapes, expectedRotations)
     Test.Header("SuitableRotationsExhaustive")
 

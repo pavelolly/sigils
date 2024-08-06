@@ -2,8 +2,6 @@ require "Test"
 
 require "Sigils"
 
-Test.exitOnExpectationFailure = true
-
 local function PlaceShapes_Manually_Helper(grid, shapes, blocks, expectedGrid)
     for i, shape in ipairs(shapes) do
         Test.ExpectTrue(PlaceShape(grid, shape, table.unpack(blocks[i])), "Could not place shape #"..i)

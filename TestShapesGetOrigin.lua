@@ -2,8 +2,6 @@ require "Test"
 
 require "Shapes"
 
-Test.exitOnExpectationFailure = true
-
 function TEST_Shapes_getOrigin()
     Test.Header("Shapes.getOriginorigin")
 

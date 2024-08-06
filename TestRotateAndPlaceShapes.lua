@@ -2,8 +2,6 @@ require "Test"
 
 require "Sigils"
 
-Test.exitOnExpectationFailure = true
-
 GRID_4x4_1 = {{"1", "1", "1", "1"},
               {"2", "2", "3", "3"},
               {"4", "2", "2", "3"},

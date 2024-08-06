@@ -1,13 +1,17 @@
-dofile "TestPermutations.lua"
-dofile "TestRotate.lua"
-dofile "TestShapesSame.lua"
-dofile "TestShapesGetOrigin.lua"
+require "Test"
+Test.exitOnExpectationFailure = true
 
-dofile "TestPlaceShapesManually.lua"
-dofile "TestPlaceShapesAutomatically.lua"
-dofile "TestRotateAndPlaceShapes.lua"
+require "TestPermutations"
+require "TestRotate"
+require "TestShapesSame"
+require "TestPermutaitonsOfShapes"
+require "TestShapesGetOrigin"
 
-dofile "TestRotatedShapes.lua"
+require "TestPlaceShapesManually"
+require "TestPlaceShapesAutomatically"
+require "TestRotateAndPlaceShapes"
 
-dofile "TestRotationsExhaustive.lua"
-dofile "TestPermutationsExhaustive.lua"
+require "TestRotatedShapes"
+
+require "TestRotationsExhaustive"
+require "TestPermutationsExhaustive"

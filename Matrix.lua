@@ -20,18 +20,23 @@ function Matrix.inBounds(mat, row, col)
     return 1 <= row and row <= #mat and 1 <= col and col <= #(mat[1])
 end
 
+function Matrix.tostring(mat)
+    s = "{"
+    for i, row in ipairs(mat) do
+        s = s..Array.tostring(row)
+        if type((next(mat, i))) == "number" then
+            s = s..",\n "
+        end
+    end
+    return s.."}"
+end
+
 function Matrix.print(mat)
     if type(mat) ~= "table" then
         print(string.format("Not a matrix (but '%s')", type(mat)))
     end
 
-    for i, row in ipairs(mat) do
-        -- should probably check type(row) == "table"
-        for j, elem in ipairs(row) do
-            io.write(elem .. " ")
-        end
-        io.write("\n")
-    end
+    print(Matrix.tostring(mat))
 end
 
 function Matrix.copy(mat)
@@ -133,8 +138,6 @@ function Matrix.find(mat, value)
 end
 
 function Matrix.findIf(mat, func)
-    if type(func) ~= "function" then return nil end
-
     for i = 1,#mat do
         for j = 1,#mat[1] do
             if func(mat[i][j]) then return i, j end
@@ -142,4 +145,7 @@ function Matrix.findIf(mat, func)
     end
     return nil
 end
+
+Matrix.metatable = {__eq = Matrix.equals,
+                    print = Matrix.print}
 

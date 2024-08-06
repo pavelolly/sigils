@@ -52,11 +52,10 @@ function Permutations(array, prev_per)
             prev_per = {}
             for i=1,#array do prev_per[i] = i end
             if (not next(prev_per)) then return nil end
-            return Permute(array, prev_per)
+            return Permute(array, prev_per), Array.copy(prev_per)
         end
-
+        
         if not NextPermutation(prev_per) then return nil end
-
         return Permute(array, prev_per),
                Array.copy(prev_per) -- return copy here to prevent affecting the iteration by modifying this value
     end

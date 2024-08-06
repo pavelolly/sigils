@@ -112,7 +112,7 @@ function RotatedShapes(shapes, prev_rotations)
 end
 
 -- check all rotations for shapes and yield every one that fits into grid
-function SuitableRotations(grid, shapes)
+function SuitableRotationsExhaustive(grid, shapes)
     if Shapes.area(shapes) ~= grid.FreeArea then
         return function() return nil end
     end
@@ -126,13 +126,6 @@ function SuitableRotations(grid, shapes)
             grid = DeepCopy(grid_copy)
 
             if could_place then
-
-                -- DEBUG
-                -- print("\nFound rotation:")
-                -- Array.print(rotations)
-                -- print("Shapes:")
-                -- Shapes.printMany(rshapes)
-
                 last_rotations = Array.copy(rotations)
                 return rotations
             end
@@ -143,7 +136,7 @@ end
 
 -- check every permutation of shapes and every posiible rotations for that permutation
 -- yield every suitable permutation with suitable rotations
-function SuitablePermutations(grid, shapes)
+function SuitablePermutationsExhaustive(grid, shapes)
     if Shapes.area(shapes) ~= grid.FreeArea then
         return function() return nil end
     end
@@ -152,7 +145,7 @@ function SuitablePermutations(grid, shapes)
     return function()
         for pshapes, permutation in Permutations(shapes, last_permutation) do
             local permutationRotations = {}
-            for rotations in SuitableRotations(grid, pshapes) do
+            for rotations in SuitableRotationsExhaustive(grid, pshapes) do
                 table.insert(permutationRotations, rotations)
             end
             if next(permutationRotations) then

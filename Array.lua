@@ -16,13 +16,24 @@ function Array.reversed(array)
     return new
 end
 
+function Array.tostring(array)
+    s = "{"
+    for i, e in ipairs(array) do
+        s = s..tostring(e)
+        if type((next(array, i))) == "number" then
+            s = s..", "
+        end
+    end
+    return s.."}"
+end
+
 function Array.print(array)
     if type(array) ~= "table" then
         print(string.format("Not an array (but '%s')", type(mat)))
         return
     end
 
-    print(table.unpack(array))
+    print(Array.tostring(array))
 end
 
 function Array.copy(array)
@@ -81,10 +92,10 @@ function Array.find(array, value)
 end
 
 function Array.findIf(array, func)
-    if type(func) ~= "function" then return nil end
-
     for i, e in ipairs(array) do
         if func(e) then return i end
     end
     return nil
 end
+
+Array.metatable = {__eq = Array.equals, print = Array.print}

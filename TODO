@@ -2,4 +2,5 @@
   1 1 1 2 ------------------> 2 2 2 1
   1 2 2 2    automatically    2 1 1 1
 - optimization: ignore repeated permutations
+- optimization: smarter rotations
   

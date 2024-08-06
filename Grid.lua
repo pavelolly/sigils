@@ -1,3 +1,4 @@
+require "DeepCopy"
 require "Matrix"
 
 Grid = {}
@@ -23,7 +24,7 @@ function Grid.create(rows, cols)
         return grid.CurrentLabel
     end
 
-    return grid
+    return setmetatable(grid, {__eq = Matrix.equals, print = Grid.print})
 end
 
 function Grid.print(grid)

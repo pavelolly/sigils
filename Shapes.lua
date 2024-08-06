@@ -1,3 +1,4 @@
+require "DeepCopy"
 require "Matrix"
 require "Permutations"
 
@@ -61,6 +62,12 @@ function Shapes.print(shape)
     Matrix.print(shape)
     print("UniqueRotationsCount:", shape.UniqueRotationsCount)
     print("Area:", shape.Area)
+end
+
+for k,v in pairs(Shapes) do
+    if type(v) == "table" then 
+        setmetatable(v, {__eq = DeepCopy, print = Shapes.print})
+    end
 end
 
 -- pretty

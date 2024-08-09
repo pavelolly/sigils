@@ -2,8 +2,8 @@ require "Test"
 
 require "Sigils"
 
-function TEST_SuitablePermutationsExhaustive(grid, shapes, expectedPermutation, expectedRotations)
-    Test.Header("SuitablePermutations")
+function TEST_SuitablePermutationsBruteForce(grid, shapes, expectedPermutation, expectedRotations)
+    Test.Header("SuitablePermutations BruteForce")
 
     print("    Rotating shapes:")
     Shapes.printMany(shapes)
@@ -12,7 +12,7 @@ function TEST_SuitablePermutationsExhaustive(grid, shapes, expectedPermutation, 
     print("    Expecting rotations   "..Array.tostring(expectedRotations).." to fit")
     
     local found = {}
-    for permutation, protations in SuitablePermutationsExhaustive(grid, shapes) do
+    for permutation, protations in SuitablePermutationsBruteForce(grid, shapes) do
         found[setmetatable(permutation, Array.metatable)] = protations
         for k,v in pairs(protations) do
             setmetatable(v, Array.metatable)
@@ -69,7 +69,7 @@ shapes = {Shapes.Z, Shapes.L, Shapes.I, Shapes.J} -- {I, Z, L, J} is right one
 expectedPermutation = setmetatable({3, 1, 2, 4}, Array.metatable)
 expectedRotations  = setmetatable({1, 0, 2, 1}, Array.metatable)
 
-TEST_SuitablePermutationsExhaustive(grid, shapes, expectedPermutation, expectedRotations)
+TEST_SuitablePermutationsBruteForce(grid, shapes, expectedPermutation, expectedRotations)
 
 grid = Grid.create(4, 4)
 expectedGrid = {{"1", "1", "1", "2"},
@@ -80,7 +80,7 @@ shapes = {Shapes.T, Shapes.T, Shapes.L, Shapes.Z} -- {L, T, Z, T}
 expectedPermutation = setmetatable({3, 1, 4, 2}, Array.metatable)
 expectedRotations = setmetatable({1, 1, 1, 2}, Array.metatable)
 
-TEST_SuitablePermutationsExhaustive(grid, shapes, expectedPermutation, expectedRotations)
+TEST_SuitablePermutationsBruteForce(grid, shapes, expectedPermutation, expectedRotations)
 
 grid = Grid.create(5, 4)
 expectedGrid = {{"1", "1", "1", "1"},
@@ -92,4 +92,4 @@ shapes = {Shapes.Square, Shapes.J, Shapes.I, Shapes.Square, Shapes.J} -- {I, J, 
 expectedPermutation = setmetatable({3, 2, 5, 1, 4}, Array.metatable)
 expectedRotations = setmetatable({1, 1, 3, 0, 0}, Array.metatable)
 
-TEST_SuitablePermutationsExhaustive(grid, shapes, expectedPermutation, expectedRotations)
+TEST_SuitablePermutationsBruteForce(grid, shapes, expectedPermutation, expectedRotations)

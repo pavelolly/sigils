@@ -13,5 +13,6 @@ require "TestRotateAndPlaceShapes"
 
 require "TestRotatedShapes"
 
-require "TestRotationsExhaustive"
-require "TestPermutationsExhaustive"
+require "TestRotationsBruteForce"
+require "TestPermutationsBruteForce"
+require "TestOptimizedPlacement"

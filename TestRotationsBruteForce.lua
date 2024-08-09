@@ -4,8 +4,8 @@ require "Array"
 require "Matrix"
 require "Sigils"
 
-function TEST_SuitableRotationsExhaustive(grid, shapes, expectedRotations)
-    Test.Header("SuitableRotationsExhaustive")
+function TEST_SuitableRotationsBruteForce(grid, shapes, expectedRotations)
+    Test.Header("SuitableRotations BruteForce")
 
     print("    Rotating shapes:")
     Shapes.printMany(shapes)
@@ -13,7 +13,7 @@ function TEST_SuitableRotationsExhaustive(grid, shapes, expectedRotations)
     print("    Expecting rotations "..Array.tostring(expectedRotations).." to fit")
 
     local found = {}
-    for rotations in SuitableRotationsExhaustive(grid, shapes) do
+    for rotations in SuitableRotationsBruteForce(grid, shapes) do
         table.insert(found, setmetatable(rotations, Array.metatable))
     end
 
@@ -44,7 +44,7 @@ expectedGrid = {{"1", "1", "1", "1"},
 shapes = {Shapes.I, Shapes.Z, Shapes.L, Shapes.J}
 expectedRotations = setmetatable({1, 0, 2, 1}, Array.metatable)
 
-TEST_SuitableRotationsExhaustive(grid, shapes, expectedRotations, expectedGrid)
+TEST_SuitableRotationsBruteForce(grid, shapes, expectedRotations, expectedGrid)
 
 grid = Grid.create(4, 4)
 expectedGrid = {{"1", "1", "1", "2"},
@@ -54,7 +54,7 @@ expectedGrid = {{"1", "1", "1", "2"},
 shapes = {Shapes.L, Shapes.T, Shapes.Z, Shapes.T}
 expectedRotations = setmetatable({1, 1, 1, 2}, Array.metatable)
 
-TEST_SuitableRotationsExhaustive(grid, shapes, expectedRotations, expectedGrid)
+TEST_SuitableRotationsBruteForce(grid, shapes, expectedRotations, expectedGrid)
 
 grid = Grid.create(5, 4)
 expectedGrid = {{"1", "1", "1", "1"},
@@ -65,4 +65,4 @@ expectedGrid = {{"1", "1", "1", "1"},
 shapes = {Shapes.I, Shapes.J, Shapes.J, Shapes.Square, Shapes.Square}
 expectedRotations = setmetatable({1, 1, 3, 0, 0}, Array.metatable)
 
-TEST_SuitableRotationsExhaustive(grid, shapes, expectedRotations, expectedGrid)
+TEST_SuitableRotationsBruteForce(grid, shapes, expectedRotations, expectedGrid)

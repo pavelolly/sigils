@@ -2,8 +2,6 @@ require "Test"
 
 require "Permutations"
 
-Test.exitOnExpectationFailure = true
-
 function TEST_Permutations(PermutationsFunc, array, start, expected, header)
     Test.Header(header)
 

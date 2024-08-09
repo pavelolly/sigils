@@ -42,9 +42,9 @@ local function PrintComparedObjects(expected, real, PrintFunc)
         end
     end
 
-    print("Expected:")
+    print("==== EXPECTED ====:")
     ExpectedPrintFunc(expected)
-    print("Real:")
+    print("==== REAL ====:")
     RealPrintFunc(real)
 end
 

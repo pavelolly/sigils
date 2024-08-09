@@ -7,4 +7,10 @@
 - if some shape in permutation cannot be placed in any way - skip the whole bunch of permutations starting with particular "prefix"
   if let's say in {1 2 3 4} shape #2 cannot be placed then i don't need all of the permutations starting with {1, 2}
   !! must be huge optimization
+
+- when switch to next permutation better to save rotations of prefix'es shapes adn also do not remove shapes from the grid
+
+- look for next free block in the direction of smallest dimension of the grid
+
+- try to find other solutions/not-solutions immediately based on some found one
   

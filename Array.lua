@@ -98,4 +98,12 @@ function Array.findIf(array, func)
     return nil
 end
 
+function Array.count(array, value)
+    local cnt = 0
+    for i, e in ipairs(array) do
+        if e == value then cnt = cnt + 1 end
+    end
+    return cnt
+end
+
 Array.metatable = {__eq = Array.equals, print = Array.print}

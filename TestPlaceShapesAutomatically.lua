@@ -12,10 +12,10 @@ function TEST_PlaceShapes_Automatically_Success_1()
 
     local grid = Grid.create(4, 4)
 
-    local I = Shapes.rotate(Shapes.I, 1)
-    local Z = Shapes.Z
-    local L = Shapes.rotate(Shapes.L, 2)
-    local J = Shapes.rotate(Shapes.J, 1)
+    local I = Shapes.rotate(Shapes.Talos.I, 1)
+    local Z = Shapes.Talos.Z
+    local L = Shapes.rotate(Shapes.Talos.L, 2)
+    local J = Shapes.rotate(Shapes.Talos.J, 1)
 
     Test.ExpectTrue(PlaceShapes(grid, {I, Z, L, J}), "Could not place shapes")
     Test.ExpectEqual(grid, GRID_4x4_1, "Grid is not what expected")
@@ -33,10 +33,10 @@ function TEST_PlaceShapes_Automatically_Success_2()
 
     local grid = Grid.create(4, 4)
 
-    local L = Shapes.rotate(Shapes.L, 1)
-    local T = Shapes.rotate(Shapes.T, 1)
-    local Z = Shapes.rotate(Shapes.Z, 1)
-    local T2 = Shapes.rotate(Shapes.T, 2)
+    local L =  Shapes.rotate(Shapes.Talos.L, 1)
+    local T =  Shapes.rotate(Shapes.Talos.T, 1)
+    local Z =  Shapes.rotate(Shapes.Talos.Z, 1)
+    local T2 = Shapes.rotate(Shapes.Talos.T, 2)
 
     Test.ExpectTrue(PlaceShapes(grid, {L, T, Z, T2}), "Could not place shapes")
     Test.ExpectEqual(grid, GRID_4x4_2, "Grid is not what expected")
@@ -55,11 +55,11 @@ function TEST_PlaceShapes_Automatically_Success_3()
 
     local grid = Grid.create(5, 4)
 
-    local I = Shapes.rotate(Shapes.I, 1)
-    local J = Shapes.rotate(Shapes.J, 1)
-    local J2 = Shapes.rotate(Shapes.J, -1)
-    local Sq = Shapes.Square
-    local Sq2 = Shapes.Square
+    local I   = Shapes.rotate(Shapes.Talos.I, 1)
+    local J   = Shapes.rotate(Shapes.Talos.J, 1)
+    local J2  = Shapes.rotate(Shapes.Talos.J, -1)
+    local Sq  = Shapes.Talos.Square
+    local Sq2 = Shapes.Talos.Square
 
     Test.ExpectTrue(PlaceShapes(grid, {I, J, J2, Sq, Sq2}), "Could not place shapes")
     Test.ExpectEqual(grid, GRID_5x4_1, "Grid is not what expected")

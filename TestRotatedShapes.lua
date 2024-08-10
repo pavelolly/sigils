@@ -2,8 +2,8 @@ require "Test"
 
 require "Sigils"
 
-I = Shapes.I
-L = Shapes.L
+I = Shapes.Talos.I
+L = Shapes.Talos.L
 shapes = {I, L}
 
 function TEST_RotatedShapes(initialRotations)

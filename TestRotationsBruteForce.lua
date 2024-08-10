@@ -41,7 +41,7 @@ expectedGrid = {{"1", "1", "1", "1"},
                 {"2", "2", "3", "3"},
                 {"4", "2", "2", "3"},
                 {"4", "4", "4", "3"}}
-shapes = {Shapes.I, Shapes.Z, Shapes.L, Shapes.J}
+shapes = {Shapes.Talos.I, Shapes.Talos.Z, Shapes.Talos.L, Shapes.Talos.J}
 expectedRotations = setmetatable({1, 0, 2, 1}, Array.metatable)
 
 TEST_SuitableRotationsBruteForce(grid, shapes, expectedRotations, expectedGrid)
@@ -51,7 +51,7 @@ expectedGrid = {{"1", "1", "1", "2"},
                 {"1", "3", "2", "2"},
                 {"3", "3", "4", "2"},
                 {"3", "4", "4", "4"}}
-shapes = {Shapes.L, Shapes.T, Shapes.Z, Shapes.T}
+shapes = {Shapes.Talos.L, Shapes.Talos.T, Shapes.Talos.Z, Shapes.Talos.T}
 expectedRotations = setmetatable({1, 1, 1, 2}, Array.metatable)
 
 TEST_SuitableRotationsBruteForce(grid, shapes, expectedRotations, expectedGrid)
@@ -62,7 +62,7 @@ expectedGrid = {{"1", "1", "1", "1"},
                 {"2", "2", "2", "3"},
                 {"4", "4", "5", "5"},
                 {"4", "4", "5", "5"}}
-shapes = {Shapes.I, Shapes.J, Shapes.J, Shapes.Square, Shapes.Square}
+shapes = {Shapes.Talos.I, Shapes.Talos.J, Shapes.Talos.J, Shapes.Talos.Square, Shapes.Talos.Square}
 expectedRotations = setmetatable({1, 1, 3, 0, 0}, Array.metatable)
 
 TEST_SuitableRotationsBruteForce(grid, shapes, expectedRotations, expectedGrid)

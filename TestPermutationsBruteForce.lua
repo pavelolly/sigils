@@ -65,7 +65,7 @@ expectedGrid = {{"1", "1", "1", "1"},
                 {"2", "2", "3", "3"},
                 {"4", "2", "2", "3"},
                 {"4", "4", "4", "3"}}
-shapes = {Shapes.Z, Shapes.L, Shapes.I, Shapes.J} -- {I, Z, L, J} is right one
+shapes = {Shapes.Talos.Z, Shapes.Talos.L, Shapes.Talos.I, Shapes.Talos.J} -- {I, Z, L, J} is right one
 expectedPermutation = setmetatable({3, 1, 2, 4}, Array.metatable)
 expectedRotations  = setmetatable({1, 0, 2, 1}, Array.metatable)
 
@@ -76,7 +76,7 @@ expectedGrid = {{"1", "1", "1", "2"},
                 {"1", "3", "2", "2"},
                 {"3", "3", "4", "2"},
                 {"3", "4", "4", "4"}}
-shapes = {Shapes.T, Shapes.T, Shapes.L, Shapes.Z} -- {L, T, Z, T}
+shapes = {Shapes.Talos.T, Shapes.Talos.T, Shapes.Talos.L, Shapes.Talos.Z} -- {L, T, Z, T}
 expectedPermutation = setmetatable({3, 1, 4, 2}, Array.metatable)
 expectedRotations = setmetatable({1, 1, 1, 2}, Array.metatable)
 
@@ -88,7 +88,7 @@ expectedGrid = {{"1", "1", "1", "1"},
                 {"2", "2", "2", "3"},
                 {"4", "4", "5", "5"},
                 {"4", "4", "5", "5"}}
-shapes = {Shapes.Square, Shapes.J, Shapes.I, Shapes.Square, Shapes.J} -- {I, J, J, Sq, Sq}
+shapes = {Shapes.Talos.Square, Shapes.Talos.J, Shapes.Talos.I, Shapes.Talos.Square, Shapes.Talos.J} -- {I, J, J, Sq, Sq}
 expectedPermutation = setmetatable({3, 2, 5, 1, 4}, Array.metatable)
 expectedRotations = setmetatable({1, 1, 3, 0, 0}, Array.metatable)
 

@@ -200,7 +200,7 @@ end
 -- optimized brure force
 function SuitablePlacements(grid, shapes)
     if grid.FreeArea ~= Shapes.area(shapes) then
-        return function() return nil end
+        return function() print("Bad area: grid.FreeArea = "..grid.FreeArea..", Shapes.area = "..Shapes.area(shapes)) end
     end
 
     local grid_copy = DeepCopy(grid)
@@ -361,17 +361,17 @@ function SuitablePlacements(grid, shapes)
                 table.insert(seen, e)
             end
         end
-        permutaitonsCount = math.floor(permutaitonsCount) -- just to make it integer
+        permutaitonsCount = math.tointeger(permutaitonsCount)
         print("Permutaitons visited: "..permutationsVisisted.."/"..permutaitonsCount..
-              " ("..math.floor(permutationsVisisted / permutaitonsCount * 100).."%)")
+              " ("..(permutationsVisisted / permutaitonsCount * 100).." %)")
         local rotationsPerPermutaionCount = 1
         for i = 1,#shapes do
             rotationsPerPermutaionCount = rotationsPerPermutaionCount * shapes[i].UniqueRotationsCount
         end
         print("Total Iterations visited: "..totalVisited.."/"..(permutaitonsCount * rotationsPerPermutaionCount)..
-              " ("..math.floor(totalVisited / (permutaitonsCount * rotationsPerPermutaionCount) * 100).."%)")
+              " ("..(totalVisited / (permutaitonsCount * rotationsPerPermutaionCount) * 100).." %)")
         return nil
     end
 end
 
--- lua -lSigils -e "for p, r in SuitablePlacements(Grid.create(4, 4), {Shapes.I, Shapes.Z, Shapes.L, Shapes.J}) do end"
+-- lua -lSigils -e "for p, r in SuitablePlacements(Grid.create(4, 4), {Shapes.Talos.I, Shapes.Talos.Z, Shapes.Talos.L, Shapes.Talos.J}) do end"

@@ -44,16 +44,16 @@ function TEST_SuitablePlacements_vs_SuitablePermutationsBruteForce(grid, shapes)
 end
 
 grid = Grid.create(4, 4)
-shapes = {Shapes.Z, Shapes.L, Shapes.I, Shapes.J}
+shapes = {Shapes.Talos.Z, Shapes.Talos.L, Shapes.Talos.I, Shapes.Talos.J}
 
 TEST_SuitablePlacements_vs_SuitablePermutationsBruteForce(grid, shapes)
 
 grid = Grid.create(4, 4)
-shapes = {Shapes.T, Shapes.T, Shapes.L, Shapes.Z}
+shapes = {Shapes.Talos.T, Shapes.Talos.T, Shapes.Talos.L, Shapes.Talos.Z}
 
 TEST_SuitablePlacements_vs_SuitablePermutationsBruteForce(grid, shapes)
 
 grid = Grid.create(5, 4)
-shapes = {Shapes.Square, Shapes.J, Shapes.I, Shapes.Square, Shapes.J}
+shapes = {Shapes.Talos.Square, Shapes.Talos.J, Shapes.Talos.I, Shapes.Talos.Square, Shapes.Talos.J}
 
 TEST_SuitablePlacements_vs_SuitablePermutationsBruteForce(grid, shapes)

@@ -5,10 +5,10 @@ require "Shapes"
 function TEST_Shapes_getOrigin()
     Test.Header("Shapes.getOriginorigin")
 
-    local rows1, cols1 = Shapes.getOrigin(Shapes.rotate(Shapes.L, -1))
-    local rows2, cols2 = Shapes.getOrigin(Shapes.rotate(Shapes.Z, 1))
-    local rows3, cols3 = Shapes.getOrigin(Shapes.I)
-    local rows4, cols4 = Shapes.getOrigin(Shapes.rotate(Shapes.T, 1))
+    local rows1, cols1 = Shapes.getOrigin(Shapes.rotate(Shapes.Talos.L, -1))
+    local rows2, cols2 = Shapes.getOrigin(Shapes.rotate(Shapes.Talos.Z, 1))
+    local rows3, cols3 = Shapes.getOrigin(Shapes.Talos.I)
+    local rows4, cols4 = Shapes.getOrigin(Shapes.rotate(Shapes.Talos.T, 1))
     local rows5, cols5 = Shapes.getOrigin({{0, 0, 0},
                                            {0, 0, 1},
                                            {1, 1, 0}})

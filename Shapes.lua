@@ -3,58 +3,160 @@ require "Matrix"
 require "Permutations"
 
 Shapes = {
-    L = {
-        {1, 0},
-        {1, 0},
-        {1, 1},
+    Talos = {
+        L = {
+            {1, 0},
+            {1, 0},
+            {1, 1},
 
-        Area = 4,
-        UniqueRotationsCount = 4
-    },
-    J = {
-        {0, 1},
-        {0, 1},
-        {1, 1},
-        
-        Area = 4,
-        UniqueRotationsCount = 4
-    },
-    I = {
-        {1},
-        {1},
-        {1},
-        {1},
+            Area = 4,
+            UniqueRotationsCount = 4
+        },
+        J = {
+            {0, 1},
+            {0, 1},
+            {1, 1},
 
-        Area = 4,
-        UniqueRotationsCount = 2
-    },
-    S = {
-        {0, 1, 1},
-        {1, 1, 0},
+            Area = 4,
+            UniqueRotationsCount = 4
+        },
+        I = {
+            {1},
+            {1},
+            {1},
+            {1},
 
-        Area = 4,
-        UniqueRotationsCount = 2
-    },
-    Z = {
-        {1, 1, 0},
-        {0, 1, 1},
+            Area = 4,
+            UniqueRotationsCount = 2
+        },
+        S = {
+            {0, 1, 1},
+            {1, 1, 0},
 
-        Area = 4,
-        UniqueRotationsCount = 2
-    },
-    Square = {
-        {1, 1},
-        {1, 1},
+            Area = 4,
+            UniqueRotationsCount = 2
+        },
+        Z = {
+            {1, 1, 0},
+            {0, 1, 1},
 
-        Area = 4,
-        UniqueRotationsCount = 1
-    },
-    T = {
-        {1, 1, 1},
-        {0, 1, 0},
+            Area = 4,
+            UniqueRotationsCount = 2
+        },
+        Square = {
+            {1, 1},
+            {1, 1},
 
-        Area = 4,
-        UniqueRotationsCount = 4
+            Area = 4,
+            UniqueRotationsCount = 1
+        },
+        T = {
+            {1, 1, 1},
+            {0, 1, 0},
+
+            Area = 4,
+            UniqueRotationsCount = 4
+        }
+    },
+
+    Lonpos = {
+        Corner = {
+            {1, 0},
+            {1, 1},
+
+            Area = 3,
+            UniqueRotationsCount = 4
+        },
+        CornerBig = {
+            {1, 0, 0},
+            {1, 0, 0},
+            {1, 1, 1},
+
+            Area = 5,
+            UniqueRotationsCount = 4
+        },
+        Square = {
+            {1, 1},
+            {1, 1},
+
+            Area = 4,
+            UniqueRotationsCount = 1
+        },
+        I = {
+            {1},
+            {1},
+            {1},
+            {1},
+
+            Area = 4,
+            UniqueRotationsCount = 2
+        },
+        L = {
+            {1, 0},
+            {1, 0},
+            {1, 1},
+
+            Area = 4,
+            UniqueRotationsCount = 4
+        },
+        LBig = {
+            {1, 0},
+            {1, 0},
+            {1, 0},
+            {1, 1},
+
+            Area = 5,
+            UniqueRotationsCount = 4
+        },
+        X = {
+            {0, 1, 0},
+            {1, 1, 1},
+            {0, 1, 0},
+
+            Area = 5,
+            UniqueRotationsCount = 1
+        },
+        Clip = {
+            {1, 1, 1},
+            {1, 0, 1},
+
+            Area = 5,
+            UniqueRotationsCount = 4
+        },
+        Zig = {
+            {1, 1, 0},
+            {0, 1, 1},
+            {0, 0, 1},
+
+            Area = 5,
+            UniqueRotationsCount = 4
+        },
+        Snake = {
+            {0, 1},
+            {1, 1},
+            {1, 0},
+            {1, 0},
+
+            Area = 5,
+            UniqueRotationsCount = 4
+        },
+        Crane = {
+            {0, 1},
+            {1, 1},
+            {0, 1},
+            {0, 1},
+
+            Area = 5,
+            UniqueRotationsCount = 4
+        },
+        Chocolate = {
+            {0, 1},
+            {1, 1},
+            {1, 1},
+
+            Area = 5,
+            UniqueRotationsCount = 4
+        }
     }
 }
 
@@ -170,8 +272,9 @@ function Shapes.same(shape1, shape2)
     return false
 end
 
-for k,v in pairs(Shapes) do
-    if type(v) == "table" then 
-        setmetatable(v, {__eq = Shapes.same, print = Shapes.print})
-    end
+for k,v in pairs(Shapes.Talos) do
+    setmetatable(v, {__eq = Shapes.same, print = Shapes.print})
+end
+for k,v in pairs(Shapes.Lonpos) do
+    setmetatable(v, {__eq = Shapes.same, print = Shapes.print})
 end

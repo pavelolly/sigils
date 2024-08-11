@@ -67,20 +67,23 @@ function NextFreeBlock(grid)
     return Matrix.find(grid, grid.DefaultLabel)
 end
 
+-- returns position such that shape's origin is at row, col
+-- shape: 0 1, row: 1, col: 1 --> return: 1, 0
+--        1 1
+local function ShiftByOrigin(shape, row, col)
+    local orow, ocol = Shapes.getOrigin(shape)
+    if not row or not col or not orow or not col then
+        return nil
+    end
+    return row - orow + 1, col - ocol + 1
+end
+
 function PlaceShapes(grid, shapes)
     if Shapes.area(shapes) ~= grid.FreeArea then return false end
     for i, shape in ipairs(shapes) do
-        row, col = NextFreeBlock(grid)
-        if not row then return false end -- probably impossible to return here as it would imply that Shapes.area(shapes) ~= grid.FreeArea
-                                         -- which is false already
-        local shape_origin_row, shape_origin_col = Shapes.getOrigin(shape)
-        if shape_origin_row then
-            -- we want to place shape such that its origin is at the free block found earlier
-            row = row - shape_origin_row + 1
-            col = col - shape_origin_col + 1
-            if not PlaceShape(grid, shape, row, col) then return false end
-            -- Matrix.print(grid)
-            -- print("==================")
+        local row, col = ShiftByOrigin(shape, NextFreeBlock(grid))
+        if not row or not PlaceShape(grid, shape, row, col) then
+            return false
         end
     end
     return true
@@ -176,6 +179,7 @@ function SuitablePermutationsBruteForce(grid, shapes)
     end
 end
 
+-- same as above but with another PermutationsFunction
 function SuitablePermutationsUniqueBruteForce(grid, shapes)
     if Shapes.area(shapes) ~= grid.FreeArea then
         return function() return nil end
@@ -198,7 +202,7 @@ function SuitablePermutationsUniqueBruteForce(grid, shapes)
 end
 
 -- optimized brure force
-function SuitablePlacements(grid, shapes)
+function SuitablePlacements(grid, shapes, printDebugInfo)
     if grid.FreeArea ~= Shapes.area(shapes) then
         return function() print("Bad area: grid.FreeArea = "..grid.FreeArea..", Shapes.area = "..Shapes.area(shapes)) end
     end
@@ -206,8 +210,10 @@ function SuitablePlacements(grid, shapes)
     local grid_copy = DeepCopy(grid)
     grid = DeepCopy(grid)
 
-    -- print("Initital grid:")
-    -- Grid.print(grid)
+    if printDebugInfo then
+        print("Initital grid:")
+        Grid.print(grid)
+    end
 
     local prev_permutation
     local prev_rotations
@@ -243,7 +249,7 @@ function SuitablePlacements(grid, shapes)
                     end
                     pshapes = Permute(shapes, permutation)
                 else
-                    -- so this counter os corrent as i visit the same permutaion which is already counted
+                    -- so this counter is corrent because i visit the same permutaion which is already counted
                     permutationsVisisted = permutationsVisisted - 1
                 end
             else
@@ -252,15 +258,18 @@ function SuitablePlacements(grid, shapes)
                     rotations[i] = 0
                 end
             end
-        
-            -- print("========================================")
+            
             permutationsVisisted = permutationsVisisted + 1
-            -- print("Permutaitons visited: "..permutationsVisisted)
-            -- print("Dealing with permutaion: "..Array.tostring(permutation))
-            -- print("Shapes:")
-            -- Shapes.printMany(pshapes)
-            -- print("And rotations: "..Array.tostring(rotations))
-            -- print()
+
+            if printDebugInfo then
+                print("========================================")
+                print("Permutaitons visited: "..permutationsVisisted)
+                print("Dealing with permutaion: "..Array.tostring(permutation))
+                print("Shapes:")
+                Shapes.printMany(pshapes)
+                print("And rotations: "..Array.tostring(rotations))
+                print()
+            end
 
             -- try to place pshapes with different rotations
             local wrong_shape_max_idx = 0
@@ -268,36 +277,50 @@ function SuitablePlacements(grid, shapes)
             while 0 < cur_shape_idx and cur_shape_idx <= #pshapes do
                 local could_place = false
                 while rotations[cur_shape_idx] < pshapes[cur_shape_idx].UniqueRotationsCount do
-                    -- print("Try shape #"..cur_shape_idx.." rotated "..rotations[cur_shape_idx].." times")
+
+                    if printDebugInfo then
+                        print("Try shape #"..cur_shape_idx.." rotated "..rotations[cur_shape_idx].." times")
+                    end
+
                     totalVisited = totalVisited + 1
 
                     local shape = Shapes.rotate(pshapes[cur_shape_idx], rotations[cur_shape_idx])
+                    local row, col = ShiftByOrigin(shape, NextFreeBlock(grid))
+                    assert(row, "There is no place for shape")
 
-                    local frow, fcol = NextFreeBlock(grid)
-                    local orow, ocol = Shapes.getOrigin(shape)
-                    assert(frow and orow, "There is no place for shape")
-                    local row = frow - orow + 1
-                    local col = fcol - ocol + 1
-
-                    -- Matrix.print(shape)
-                    -- print("At: ("..row..", "..col..")")
+                    if printDebugInfo then
+                        Matrix.print(shape)
+                        print("At: ("..row..", "..col..")")
+                    end
 
                     could_place = PlaceShape(grid, shape, row, col)
                     if could_place then
-                        -- print("Placed shape #"..cur_shape_idx.."; Grid:")
-                        -- Matrix.print(grid)
-                        -- print()
+
+                        if printDebugInfo then
+                            print("Placed shape #"..cur_shape_idx.."; Grid:")
+                            Matrix.print(grid)
+                            print()
+                        end
+
                         break
                     end
 
-                    -- print("Could not place shape #"..cur_shape_idx)
-                    -- print()
+                    if printDebugInfo then
+                        print("Could not place shape #"..cur_shape_idx)
+                        print()
+                    end
+
                     rotations[cur_shape_idx] = rotations[cur_shape_idx] + 1
                 end
 
                 if not could_place then
-                    -- print("Stop rotating shape #"..cur_shape_idx)
-                    if cur_shape_idx > wrong_shape_max_idx then
+
+                    if printDebugInfo then
+                        print("Stop rotating shape #"..cur_shape_idx)
+                    end
+
+                    if cur_shape_idx > wrong_shape_max_idx then        
+                        -- remember number of shape which we failed to place
                         wrong_shape_max_idx = cur_shape_idx
                     end
                     -- if could not place shape at current index go back and try to rotate one of prev shapes
@@ -306,8 +329,12 @@ function SuitablePlacements(grid, shapes)
                         cur_shape_idx = cur_shape_idx - 1
                         if cur_shape_idx >= 1 then
                             RemoveLastShape(grid)
-                            -- print("Removed shape #"..cur_shape_idx.."; Grid:")
-                            -- Matrix.print(grid)
+
+                            if printDebugInfo then
+                                print("Removed shape #"..cur_shape_idx.."; Grid:")
+                                Matrix.print(grid)
+                            end
+
                         end
                     end
                     -- print()
@@ -321,57 +348,89 @@ function SuitablePlacements(grid, shapes)
                     cur_shape_idx = cur_shape_idx + 1
                 end
                 if 0 < cur_shape_idx and cur_shape_idx <= #pshapes then
-                    -- print("Moving to shape #"..cur_shape_idx)
+
+                    if printDebugInfo then
+                        print("Moving to shape #"..cur_shape_idx)
+                    end
+
                 end
             end
 
-            -- print("Done with permutation: "..Array.tostring(permutation))
-            -- print("Having rotations: "..Array.tostring(rotations))
-            -- print()
-        
-            -- print("Cleaning up")
+            if printDebugInfo then
+                print("Done with permutation: "..Array.tostring(permutation))
+                print("Having rotations: "..Array.tostring(rotations))
+                print()
+            end
+         
             grid = DeepCopy(grid_copy)
-            -- Matrix.print(grid)
+
+            if printDebugInfo then
+                print("Cleaning up")
+                Matrix.print(grid)
+            end
 
             if cur_shape_idx > #pshapes then
-                -- print("Returning")
+                
+                if printDebugInfo then
+                    print("Returning")
+                end
+
                 prev_permutation = permutation
                 prev_rotations = rotations
                 return Array.copy(permutation), Array.copy(rotations)
             end
-            -- print("Going to the next permutation, skipping prefix of length "..wrong_shape_max_idx)
+
+            if printDebugInfo then
+                print("Going to the next permutation, skipping prefix of length "..wrong_shape_max_idx)
+            end
+
         until not NextPermutationSkipPrefix(permutation, wrong_shape_max_idx)
 
-        print("=========== SuitablePlacements Statistic ==============")
-
-        local function factorial(n)
-            local res = 1
-            for i = 1,n do
-                res = res * i
-            end
-            return res
-        end
-
-        local permutaitonsCount = factorial(#shapes)
-        local seen = {}
-        local init_per = GetInitialPermutation(shapes)
-        for i, e in ipairs(init_per) do
-            if not Array.find(seen, e) then
-                permutaitonsCount = permutaitonsCount / factorial(Array.count(init_per, e))
-                table.insert(seen, e)
-            end
-        end
-        permutaitonsCount = math.tointeger(permutaitonsCount)
-        print("Permutaitons visited: "..permutationsVisisted.."/"..permutaitonsCount..
-              " ("..(permutationsVisisted / permutaitonsCount * 100).." %)")
-        local rotationsPerPermutaionCount = 1
-        for i = 1,#shapes do
-            rotationsPerPermutaionCount = rotationsPerPermutaionCount * shapes[i].UniqueRotationsCount
-        end
-        print("Total Iterations visited: "..totalVisited.."/"..(permutaitonsCount * rotationsPerPermutaionCount)..
-              " ("..(totalVisited / (permutaitonsCount * rotationsPerPermutaionCount) * 100).." %)")
+        
+        -- PrintStatistics(shapes, permutationsVisisted, totalVisited, "=========== SuitablePlacements Statistic ==============")
+        
         return nil
     end
 end
 
--- lua -lSigils -e "for p, r in SuitablePlacements(Grid.create(4, 4), {Shapes.Talos.I, Shapes.Talos.Z, Shapes.Talos.L, Shapes.Talos.J}) do end"
+local function factorial(n)
+    local res = 1
+    for i = 1,n do
+        res = res * i
+    end
+    return res
+end
+
+function PrintStatistics(shapes, permutationsVisisted, totalVisited, header)
+    if header then io.write(header) io.write("\n") end
+
+    local seen = {}
+    local init_per = GetInitialPermutation(shapes)
+    local permutaitonsCount = factorial(#shapes)
+    for i, e in ipairs(init_per) do
+        if not Array.find(seen, e) then
+            permutaitonsCount = permutaitonsCount / factorial(Array.count(init_per, e))
+            table.insert(seen, e)
+        end
+    end
+    permutaitonsCount = math.tointeger(permutaitonsCount)
+    print(string.format("Permutaitons visited:      %d / %d (%.3f %%) / %d (%.3f %%)",
+                         permutationsVisisted,
+                         permutaitonsCount,
+                         permutationsVisisted / permutaitonsCount * 100,
+                         factorial(#shapes),
+                         permutationsVisisted / factorial(#shapes) * 100))
+
+    local rotationsPerPermutaionCount = 1
+    for i = 1,#shapes do
+        rotationsPerPermutaionCount = rotationsPerPermutaionCount * shapes[i].UniqueRotationsCount
+    end
+    print(string.format("Total Iterations visited:  %d / %d (%.3f %%) / %d (%.3f %%)",
+                         totalVisited,
+                         permutaitonsCount * rotationsPerPermutaionCount,
+                         totalVisited / (permutaitonsCount * rotationsPerPermutaionCount) * 100,
+                         factorial(#shapes) * rotationsPerPermutaionCount,
+                         totalVisited / (factorial(#shapes) * rotationsPerPermutaionCount) * 100))
+end
+
+-- lua -lSigils -e "for p, r in SuitablePlacements(Grid.create(4, 4), {Shapes.Talos.Z, Shapes.Talos.L, Shapes.Talos.I, Shapes.Talos.J}, true) do end"

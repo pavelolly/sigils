@@ -202,37 +202,80 @@ function SuitablePermutationsUniqueBruteForce(grid, shapes)
 end
 
 -- optimized brure force
-function SuitablePlacements(grid, shapes, printDebugInfo)
+function SuitablePlacements(grid, shapes, debug)
+    -- debug
+    debug = debug or {}
+    local debug_print_info            = debug.print_info
+    local debug_start                 = debug.start or 0
+    local debug_stop                  = debug.stop  or math.maxinteger
+    local debug_exit_on_reaching_stop = debug.exit_on_reaching_stop
+
     if grid.FreeArea ~= Shapes.area(shapes) then
-        return function() print("Bad area: grid.FreeArea = "..grid.FreeArea..", Shapes.area = "..Shapes.area(shapes)) end
+        return function()
+            if debug_print_info then
+                print("Areas dont't match: grid.FreeArea = "..grid.FreeArea..", Shapes.area = "..Shapes.area(shapes))
+            end
+        end
     end
 
     local grid_copy = DeepCopy(grid)
     grid = DeepCopy(grid)
 
-    if printDebugInfo then
+    local length = #shapes
+
+    if debug_print_info then
         print("Initital grid:")
         Grid.print(grid)
     end
 
+    -- to save state between calls to iterator function
     local prev_permutation
     local prev_rotations
-    local permutationsVisisted = 0
-    local totalVisited = 0
+
+    -- some stats
+    local permutations_visited = 0
+    local total_visited = 0
+    local solutions_found = 0
+
+    -- to skip some of rotataions when jumping to next permutation
+    local prefix_rotations = {}
+
+    local function CutPrefixRotations(permutation, next_permutation)
+        for i = 1,length do
+            if permutation[i] ~= next_permutation[i] then
+                for j = i, length do
+                    prefix_rotations[j] = nil
+                end
+                break
+            end
+        end
+    end
 
     return function()
         local permutation = prev_permutation or GetInitialPermutation(shapes)
         local rotations
         repeat
+            if debug_start <= solutions_found and solutions_found <= debug_stop then
+                debug_print_info = debug.print_info
+            else
+                if solutions_found > debug_stop and debug_exit_on_reaching_stop then
+                    print("DEBUG: Exiting on reaching solution #"..solutions_found)
+                    return nil
+                end
+                debug_print_info = false
+            end
+
             -- prepare permuted shapes and rotations
             local pshapes = Permute(shapes, permutation)
+
+            local save_prefix_rotations = true
 
             if not rotations and prev_rotations then
                 -- this block is supposed to be run only on the first iteration
 
                 -- jump to next rotations
                 local zeros_cnt = 0
-                for i = #prev_rotations,1,-1 do
+                for i = length,1,-1 do
                     prev_rotations[i] = (prev_rotations[i] + 1) % pshapes[i].UniqueRotationsCount
                     if prev_rotations[i] ~= 0 then
                         break
@@ -243,27 +286,39 @@ function SuitablePlacements(grid, shapes, printDebugInfo)
 
                 -- if as the result rotations == {0, 0, ..., 0}
                 -- then also jump to next permutation
-                if zeros_cnt == #rotations then
-                    if not NextPermutation(permutation) then
+                if zeros_cnt == length then
+                    local next_permutation = Array.copy(permutation)
+                    if not NextPermutation(next_permutation) then
                         return nil
                     end
+                    CutPrefixRotations(permutation, next_permutation)
+                    permutation = next_permutation
+
                     pshapes = Permute(shapes, permutation)
                 else
                     -- so this counter is corrent because i visit the same permutaion which is already counted
-                    permutationsVisisted = permutationsVisisted - 1
+                    permutations_visited = permutations_visited - 1
                 end
+
+                -- forbid saving prefix rotations as we are kind of continuing doing work of previuos call 
+                save_prefix_rotations = false
             else
                 rotations = rotations or {}
-                for i = 1, #pshapes do
-                    rotations[i] = 0
+                local i = 1
+                while prefix_rotations[i] do
+                    rotations[i] = prefix_rotations[i]
+                    i = i + 1
+                end
+                for j = i,length do
+                    rotations[j] = 0
                 end
             end
             
-            permutationsVisisted = permutationsVisisted + 1
+            permutations_visited = permutations_visited + 1
 
-            if printDebugInfo then
+            if debug_print_info then
                 print("========================================")
-                print("Permutaitons visited: "..permutationsVisisted)
+                print("Permutaitons visited: "..permutations_visited)
                 print("Dealing with permutaion: "..Array.tostring(permutation))
                 print("Shapes:")
                 Shapes.printMany(pshapes)
@@ -274,48 +329,59 @@ function SuitablePlacements(grid, shapes, printDebugInfo)
             -- try to place pshapes with different rotations
             local wrong_shape_max_idx = 0
             local cur_shape_idx = 1
-            while 0 < cur_shape_idx and cur_shape_idx <= #pshapes do
+            while 0 < cur_shape_idx and cur_shape_idx <= length do
                 local could_place = false
                 while rotations[cur_shape_idx] < pshapes[cur_shape_idx].UniqueRotationsCount do
 
-                    if printDebugInfo then
+                    if debug_print_info then
                         print("Try shape #"..cur_shape_idx.." rotated "..rotations[cur_shape_idx].." times")
                     end
 
-                    totalVisited = totalVisited + 1
+                    total_visited = total_visited + 1
 
                     local shape = Shapes.rotate(pshapes[cur_shape_idx], rotations[cur_shape_idx])
                     local row, col = ShiftByOrigin(shape, NextFreeBlock(grid))
                     assert(row, "There is no place for shape")
 
-                    if printDebugInfo then
+                    if debug_print_info then
                         Matrix.print(shape)
                         print("At: ("..row..", "..col..")")
                     end
 
                     could_place = PlaceShape(grid, shape, row, col)
                     if could_place then
-
-                        if printDebugInfo then
+                        if debug_print_info then
                             print("Placed shape #"..cur_shape_idx.."; Grid:")
                             Matrix.print(grid)
-                            print()
+                        end
+
+                        if save_prefix_rotations then
+                            prefix_rotations[cur_shape_idx] = rotations[cur_shape_idx]
+
+                            if debug_print_info then
+                                print("Saved to prefix_rotations["..cur_shape_idx.."] = "..rotations[cur_shape_idx])
+                                print()
+                            end
                         end
 
                         break
                     end
 
-                    if printDebugInfo then
+                    -- could not place here
+
+                    rotations[cur_shape_idx] = rotations[cur_shape_idx] + 1
+
+                    if debug_print_info then
                         print("Could not place shape #"..cur_shape_idx)
                         print()
                     end
 
-                    rotations[cur_shape_idx] = rotations[cur_shape_idx] + 1
                 end
 
                 if not could_place then
+                    save_prefix_rotations = false
 
-                    if printDebugInfo then
+                    if debug_print_info then
                         print("Stop rotating shape #"..cur_shape_idx)
                     end
 
@@ -330,7 +396,7 @@ function SuitablePlacements(grid, shapes, printDebugInfo)
                         if cur_shape_idx >= 1 then
                             RemoveLastShape(grid)
 
-                            if printDebugInfo then
+                            if debug_print_info then
                                 print("Removed shape #"..cur_shape_idx.."; Grid:")
                                 Matrix.print(grid)
                             end
@@ -349,14 +415,14 @@ function SuitablePlacements(grid, shapes, printDebugInfo)
                 end
                 if 0 < cur_shape_idx and cur_shape_idx <= #pshapes then
 
-                    if printDebugInfo then
+                    if debug_print_info then
                         print("Moving to shape #"..cur_shape_idx)
                     end
 
                 end
             end
 
-            if printDebugInfo then
+            if debug_print_info then
                 print("Done with permutation: "..Array.tostring(permutation))
                 print("Having rotations: "..Array.tostring(rotations))
                 print()
@@ -364,30 +430,47 @@ function SuitablePlacements(grid, shapes, printDebugInfo)
          
             grid = DeepCopy(grid_copy)
 
-            if printDebugInfo then
+            if debug_print_info then
                 print("Cleaning up")
                 Matrix.print(grid)
             end
 
-            if cur_shape_idx > #pshapes then
+            if cur_shape_idx > length then
                 
-                if printDebugInfo then
+                if debug_print_info then
                     print("Returning")
                 end
 
                 prev_permutation = permutation
                 prev_rotations = rotations
+                solutions_found = solutions_found + 1
+
+                if debug_print_info then
+                    print("Found solution #"..solutions_found)
+                end
+
                 return Array.copy(permutation), Array.copy(rotations)
             end
 
-            if printDebugInfo then
-                print("Going to the next permutation, skipping prefix of length "..wrong_shape_max_idx)
+            local next_permutation = Array.copy(permutation)
+            local next_permutation_exists = NextPermutationSkipPrefix(next_permutation, wrong_shape_max_idx)
+            if next_permutation_exists then
+                CutPrefixRotations(permutation, next_permutation)
+                permutation = next_permutation
+
+                if debug_print_info then
+                    print("Going to the next permutation, skipping prefix of length "..wrong_shape_max_idx)
+                    print("Saving rotations: "..Array.tostring(prefix_rotations))
+                end
+
             end
+        until not next_permutation_exists
 
-        until not NextPermutationSkipPrefix(permutation, wrong_shape_max_idx)
-
+        if debug_print_info then
+            print("Done")
+        end
         
-        -- PrintStatistics(shapes, permutationsVisisted, totalVisited, "=========== SuitablePlacements Statistic ==============")
+        PrintStatistics(shapes, permutations_visited, total_visited, "=========== SuitablePlacements Statistic ==============")
         
         return nil
     end
@@ -401,7 +484,7 @@ local function factorial(n)
     return res
 end
 
-function PrintStatistics(shapes, permutationsVisisted, totalVisited, header)
+function PrintStatistics(shapes, permutations_visited, total_visited, header)
     if header then io.write(header) io.write("\n") end
 
     local seen = {}
@@ -415,22 +498,22 @@ function PrintStatistics(shapes, permutationsVisisted, totalVisited, header)
     end
     permutaitonsCount = math.tointeger(permutaitonsCount)
     print(string.format("Permutaitons visited:      %d / %d (%.3f %%) / %d (%.3f %%)",
-                         permutationsVisisted,
+                         permutations_visited,
                          permutaitonsCount,
-                         permutationsVisisted / permutaitonsCount * 100,
+                         permutations_visited / permutaitonsCount * 100,
                          factorial(#shapes),
-                         permutationsVisisted / factorial(#shapes) * 100))
+                         permutations_visited / factorial(#shapes) * 100))
 
     local rotationsPerPermutaionCount = 1
     for i = 1,#shapes do
         rotationsPerPermutaionCount = rotationsPerPermutaionCount * shapes[i].UniqueRotationsCount
     end
     print(string.format("Total Iterations visited:  %d / %d (%.3f %%) / %d (%.3f %%)",
-                         totalVisited,
+                         total_visited,
                          permutaitonsCount * rotationsPerPermutaionCount,
-                         totalVisited / (permutaitonsCount * rotationsPerPermutaionCount) * 100,
+                         total_visited / (permutaitonsCount * rotationsPerPermutaionCount) * 100,
                          factorial(#shapes) * rotationsPerPermutaionCount,
-                         totalVisited / (factorial(#shapes) * rotationsPerPermutaionCount) * 100))
+                         total_visited / (factorial(#shapes) * rotationsPerPermutaionCount) * 100))
 end
 
--- lua -lSigils -e "for p, r in SuitablePlacements(Grid.create(4, 4), {Shapes.Talos.Z, Shapes.Talos.L, Shapes.Talos.I, Shapes.Talos.J}, true) do end"
+-- lua -lSigils -e "for p, r in SuitablePlacements(Grid.create(4, 4), {Shapes.Talos.Z, Shapes.Talos.L, Shapes.Talos.I, Shapes.Talos.J}, {debug_print_info = true}) do end"

@@ -20,7 +20,8 @@ function Array.tostring(array)
     s = "{"
     for i, e in ipairs(array) do
         s = s..tostring(e)
-        if type((next(array, i))) == "number" then
+        next_number = next(array, i)
+        if type(next_number) == "number" and next_number == i + 1 then
             s = s..", "
         end
     end

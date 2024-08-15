@@ -1,11 +1,13 @@
 require "Sigils"
 
-function FindSolutions(grid, shapes, debug)
+function FindSolutions(grid, shapes)
     local res = {}
+    -- local debug = {print_info = true, prev_permutation = {1, 5, 2, 8, 2, 4, 8, 9, 8, 9, 4, 5}, number_solutions_to_inspect = 2}
     start = os.clock()
     for p, r in SuitablePlacements(grid, shapes, debug) do
         table.insert(res, {p, r})
-        -- print("{"..Array.tostring(p)..", "..Array.tostring(r).."}")
+        print("{"..Array.tostring(p)..", "..Array.tostring(r).."}")
+        break
         -- print("Permutaion: "..Array.tostring(p))
         -- print("Rotations:  "..Array.tostring(r))
         -- print()
@@ -32,6 +34,14 @@ end
 -- Time taken: 0.469s
 -- ~2% less total iterations
 --
+-- Third iteration: searching for free blocks columnwise
+-- =========== SuitablePlacements Statistic ==============
+-- Permutaitons visited:      464 / 1260 (36.825 %) / 5040 (9.206 %)
+-- Total Iterations visited:  14555 / 2580480 (0.564 %) / 10321920 (0.141 %)
+-- Found 24 solutions
+-- Time taken: 0.141s
+-- ~3 times faster, Around half less permutations checked
+--
 -- FindSolutions(Grid.create(4, 7), {
 --     Shapes.Talos.S,
 --     Shapes.Talos.S,
@@ -56,6 +66,14 @@ end
 -- Found 262 solutions
 -- Time taken: 3.875s
 -- ~2.5% less total iterations
+--
+-- Third iteration
+-- =========== SuitablePlacements Statistic ==============
+-- Permutaitons visited:      7242 / 22680 (31.931 %) / 362880 (1.996 %)       
+-- Total Iterations visited:  420488 / 46448640 (0.905 %) / 743178240 (0.057 %)
+-- Found 265 solutions
+-- Time taken: 4.234s
+-- Actually the same (slighlty different because of the bug in the second iteration)
 --
 -- FindSolutions(Grid.create(6, 6), {
 --     Shapes.Talos.Square,
@@ -84,7 +102,15 @@ end
 -- Time taken: 1806.531s --> 30 mins 6 secs
 -- ~1% less total iterations
 --
--- res = FindSolutions(Grid.create(6, 8), {
+-- Third iteration
+-- =========== SuitablePlacements Statistic ==============
+-- Permutaitons visited:      635947 / 4989600 (12.745 %) / 479001600 (0.133 %)
+-- Total Iterations visited:  64042489 / 653996851200 (0.010 %) / 62783697715200 (0.000 %)
+-- Found 19635 solutions
+-- Time taken: 630.375s ---> 10 mins 30 secs
+-- ~3 times faster
+--
+-- FindSolutions(Grid.create(6, 8), {
 --     Shapes.Talos.I,
 --     Shapes.Talos.T,
 --     Shapes.Talos.T,
@@ -112,8 +138,11 @@ end
 --
 -- Second iteration
 -- still unwaitable: if we assume that we reduced number of iterations by 2% (so now it is 98% of what it was)
---                   that is still just 1 hour which is obviously insignificant
+--                   that is still just 1 hour time reduction which is obviously insignificant
 --
+-- Third iteration
+-- still unwaitable but should take from 8 to 16 hours
+-- one solution is found in 3.453 s
 -- FindSolutions(Grid.create(5, 11), {
 --     Shapes.Lonpos.Corner,
 --     Shapes.Lonpos.CornerBig,
@@ -128,5 +157,30 @@ end
 --     Shapes.Lonpos.Crane,
 --     Shapes.Lonpos.Chocolate
 -- })
+
+Lonpos_shapes = {
+    Shapes.Lonpos.Corner,
+    Shapes.Lonpos.CornerBig,
+    Shapes.Lonpos.Square,
+    Shapes.Lonpos.I,
+    Shapes.Lonpos.L,
+    Shapes.Lonpos.LBig,
+    Shapes.Lonpos.X,
+    Shapes.Lonpos.Clip,
+    Shapes.Lonpos.Zig,
+    Shapes.Lonpos.Snake,
+    Shapes.Lonpos.Crane,
+    Shapes.Lonpos.Chocolate
+}
+
+grid = Grid.create(5, 11)
+p, r = FindRandomSolution(grid, Lonpos_shapes)
+Array.print(p)
+Array.print(r)
+prshapes = Shapes.rotateMany(Permute(Lonpos_shapes, p), r)
+
+Shapes.printMany(prshapes)
+PlaceShapes(grid, prshapes)
+Grid.print(grid)
 
 

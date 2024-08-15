@@ -128,21 +128,45 @@ function Matrix.fill(mat, value)
     end
 end
 
-function Matrix.find(mat, value)
-    for i = 1,#mat do
-        for j = 1,#mat[1] do
-            if mat[i][j] == value then return i, j end
+function Matrix.find(mat, value, columnwise)
+    local rows = #mat
+    local cols = #mat[1]
+
+    if not columnwise then
+        for i = 1,rows do
+            for j = 1,cols do
+                if mat[i][j] == value then return i, j end
+            end
+        end
+    else
+        for j = 1,cols do
+            for i = 1,rows do
+                if mat[i][j] == value then return i, j end
+            end
         end
     end
+
     return nil
 end
 
-function Matrix.findIf(mat, func)
-    for i = 1,#mat do
-        for j = 1,#mat[1] do
-            if func(mat[i][j]) then return i, j end
+function Matrix.findIf(mat, func, columnwise)
+    local rows = #mat
+    local cols = #mat[1]
+
+    if not columnwise then
+        for i = 1,rows do
+            for j = 1,cols do
+                if func(mat[i][j]) then return i, j end
+            end
+        end
+    else
+        for j = 1,cols do
+            for i = 1,rows do
+                if func(mat[i][j]) then return i, j end
+            end
         end
     end
+
     return nil
 end
 

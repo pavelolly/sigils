@@ -10,12 +10,13 @@
 
 [x] measure time
 [x] when switch to next permutation better to save rotations of prefix'es shapes adn also do not remove shapes from the grid
-[-] look for next free block in the direction of smallest dimension of the grid
-[-] look for next free block in the smallest "island" of empty blocks
+[x] look for next free block in the direction of smallest dimension of the grid
+[-] look for next free block in the smallest "island" of empty blocks and also compare the size of the island with the size of the shape
+    ! this should skip some unnesessary rotations
 [-] try to find other solutions/not-solutions immediately based on some found one
     implies the need to implement a hash table or smth
 
-[-] parallel calculations (last optimization to do because i want the main algorithm to be the best it can possibly be)
+[-] parallel calculations
 
 [-] add reflections besides rotations
 

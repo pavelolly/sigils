@@ -1,5 +1,2 @@
-# debug output 
-*.txt
-
-# python scripts for debugging
-*.py
+# debug folder
+Debug/

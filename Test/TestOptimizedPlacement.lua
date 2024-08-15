@@ -26,12 +26,19 @@ function TEST_SuitablePlacements_vs_SuitablePermutationsBruteForce(grid, shapes)
         end
     end
 
+    local t1 = os.clock()
+
     local bruteForceOut = setmetatable({}, {__eq = _equals, print = _print})
     for p, rs in SuitablePermutationsUniqueBruteForce(grid, shapes) do
         for i, r in ipairs(rs) do
             table.insert(bruteForceOut, {p, r})
         end
     end
+
+    local t2 = os.clock()
+
+    print("Brute Force done in "..(t2 - t1).." secs")
+    print("Found "..#bruteForceOut.." solutions")
 
     local optimizedOut = {}
     for p, r in SuitablePlacements(grid, shapes) do
@@ -57,3 +64,10 @@ grid = Grid.create(5, 4)
 shapes = {Shapes.Talos.Square, Shapes.Talos.J, Shapes.Talos.I, Shapes.Talos.Square, Shapes.Talos.J}
 
 TEST_SuitablePlacements_vs_SuitablePermutationsBruteForce(grid, shapes)
+
+-- grid = Grid.create(6, 6)
+-- shapes = {Shapes.Talos.Square, Shapes.Talos.Z, Shapes.Talos.J, Shapes.Talos.Z, Shapes.Talos.L, Shapes.Talos.L, Shapes.Talos.J, Shapes.Talos.Square, Shapes.Talos.I}
+-- TEST_SuitablePlacements_vs_SuitablePermutationsBruteForce(grid, shapes)
+--
+-- Brute Force done in 3076.015 secs
+-- Found 265 solutions

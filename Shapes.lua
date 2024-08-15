@@ -238,17 +238,17 @@ end
 
 -- get row and col of left- and uppermost non-empty block
 -- 
---   0 0 0
---   0 0 1  --> 2, 3
---   0 1 1
---   0 1 0
+--   0 0 0             
+--   0 0 1  --> 2, 3 (3, 1 if columnwise == true)
+--   1 1 1             
+--   0 1 0              
 --
-function Shapes.getOrigin(shape)
-    return Matrix.findIf(shape, function(elem) return elem ~= 0 end)
+function Shapes.getOrigin(shape, columnwise)
+    return Matrix.findIf(shape, function(elem) return elem ~= 0 end, columnwise)
 end
 
 
--- returns true if shape1 ans shape2 are the same shape up to rotation meaning:
+-- returns true if shape1 ans shape2 are the same shape up to rotation, meaning:
 -- 0 0 1         1 0 
 -- 1 1 1   and   1 0   are the same
 --               1 1

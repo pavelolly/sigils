@@ -39,3 +39,25 @@ function Grid.clear(grid)
     grid.FreeArea = grid.TotalArea
     grid.CurrentLabel = grid.InitialLabel
 end
+
+function Grid.haveSamePlacement(grid1, grid2)
+    if #grid1 ~= #grid2 or #grid1[1] ~= #grid2[1] then
+        return false
+    end
+
+    local labels_map = {}
+    for i = 1, #grid1 do
+        for j = 1, #grid1[1] do
+            local label1 = grid1[i][j]
+            local label2 = grid2[i][j]
+
+            local label_mapped = labels_map[label1]
+            if label_mapped and label2 ~= label_mapped then
+                return false
+            else
+                labels_map[label1] = label2
+            end
+        end
+    end
+    return true
+end

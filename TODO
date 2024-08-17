@@ -13,11 +13,15 @@
 [x] look for next free block in the direction of smallest dimension of the grid
 [-] look for next free block in the smallest "island" of empty blocks and also compare the size of the island with the size of the shape
     ! this should skip some unnesessary rotations
+    !! might not be that much of win in terms of time
+
 [-] try to find other solutions/not-solutions immediately based on some found one
     implies the need to implement a hash table or smth
+    !! won't actually work for non-empty initial grid
+    
+[x] add reflections besides rotations
+    !! apparently became a huge optimization
 
-[-] parallel calculations
-
-[-] add reflections besides rotations
+[-] do some extra memory tweaks to optimize the program
 
 [-] make visualisation embedding this project into C++ program

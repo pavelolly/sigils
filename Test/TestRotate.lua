@@ -29,30 +29,4 @@ function TEST_Matrix_rotate()
     Test.Footer()
 end
 
-function TEST_Shapes_rotate()
-    Test.Header("Shapes.rotate")
-
-    local I = Shapes.rotate(Shapes.Talos.I, 1)
-    local Z = DeepCopy(Shapes.Talos.Z)
-    local L = Shapes.rotate(Shapes.Talos.L, 2)
-    local J = Shapes.rotate(Shapes.Talos.J, 1)
-    local T = Shapes.rotate(Shapes.Talos.T, 1)
-
-    Test.ExpectEqual(setmetatable(I, Matrix.metatable), {{1, 1, 1, 1}}, "I rotation wrong")
-    Test.ExpectEqual(setmetatable(Z, Matrix.metatable), Shapes.Talos.Z, "Z rotation wrong")
-    Test.ExpectEqual(setmetatable(L, Matrix.metatable), {{1, 1},
-                                                         {0, 1},
-                                                         {0, 1}}, "L rotation wrong")
-    Test.ExpectEqual(setmetatable(J, Matrix.metatable), {{1, 0, 0},
-                                                         {1, 1, 1}}, "J rotation wrong")
-    Test.ExpectEqual(setmetatable(T, Matrix.metatable), {{0, 1},
-                                                         {1, 1},
-                                                         {0, 1}}, "T rotation wrong")
-
-    Test.ExpectEqual(Shapes.rotate(Shapes.Talos.T, 3), Shapes.rotate(Shapes.Talos.T, -1), "Rotation 3 and rotation -1 are not the same rotations")
-
-    Test.Footer()
-end
-
 TEST_Matrix_rotate()
-TEST_Shapes_rotate()

@@ -64,6 +64,21 @@ function Array.equals(array, other)
     return true
 end
 
+function Array.lessThanOrEqual(array, other)
+    local min_len = #array < #other and #array or #other
+    
+    for i = 1, min_len do
+        if array[i] < other[i] then
+            return true
+        end
+        if array[i] > other[i] then
+            return false
+        end
+    end
+
+    return min_len == #array
+end
+
 function Array.sub(array, s, e)
     s = s or 1
     e = e or #array

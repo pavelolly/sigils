@@ -42,6 +42,13 @@ end
 -- Time taken: 0.141s
 -- ~3 times faster, Around half less permutations checked
 --
+-- Fourth iteration: all forms of shapes are predefined
+-- =========== SuitablePlacements Statistic ==============
+-- Permutaitons visited:      464 / 1260 (36.825 %) / 5040 (9.206 %)        
+-- Total Iterations visited:  14555 / 2580480 (0.564 %) / 10321920 (0.141 %)
+-- Found 24 solutions
+-- Time taken: 0.047s
+-- Faster because you don't rotate shapes over and over: you just take predefined matrices
 -- FindSolutions(Grid.create(4, 7), {
 --     Shapes.Talos.S,
 --     Shapes.Talos.S,
@@ -75,6 +82,13 @@ end
 -- Time taken: 4.234s
 -- Actually the same (slighlty different because of the bug in the second iteration)
 --
+-- Fourth itertation
+-- =========== SuitablePlacements Statistic ==============
+-- Permutaitons visited:      7242 / 22680 (31.931 %) / 362880 (1.996 %)       
+-- Total Iterations visited:  420488 / 46448640 (0.905 %) / 743178240 (0.057 %)
+-- Found 265 solutions
+-- Time taken: 1.328s
+-- ~3 times faster because of reduction of rotations on each itertaion
 -- FindSolutions(Grid.create(6, 6), {
 --     Shapes.Talos.Square,
 --     Shapes.Talos.Z,
@@ -110,6 +124,12 @@ end
 -- Time taken: 630.375s ---> 10 mins 30 secs
 -- ~3 times faster
 --
+-- Fourth itaration
+-- =========== SuitablePlacements Statistic ==============
+-- Permutaitons visited:      635947 / 4989600 (12.745 %) / 479001600 (0.133 %)
+-- Total Iterations visited:  64042489 / 653996851200 (0.010 %) / 62783697715200 (0.000 %)
+-- Found 19635 solutions
+-- Time taken: 194.093s --> 3 mins 13 secs
 -- FindSolutions(Grid.create(6, 8), {
 --     Shapes.Talos.I,
 --     Shapes.Talos.T,
@@ -143,6 +163,11 @@ end
 -- Third iteration
 -- still unwaitable but should take from 8 to 16 hours
 -- one solution is found in 3.453 s
+--
+-- Fourth iteration
+-- should take between 2 and 5 hours
+-- one solution is found in 0.39s
+--
 -- FindSolutions(Grid.create(5, 11), {
 --     Shapes.Lonpos.Corner,
 --     Shapes.Lonpos.CornerBig,
@@ -157,6 +182,7 @@ end
 --     Shapes.Lonpos.Crane,
 --     Shapes.Lonpos.Chocolate
 -- })
+
 
 Lonpos_shapes = {
     Shapes.Lonpos.Corner,
@@ -173,14 +199,15 @@ Lonpos_shapes = {
     Shapes.Lonpos.Chocolate
 }
 
-grid = Grid.create(5, 11)
-p, r = FindRandomSolution(grid, Lonpos_shapes)
-Array.print(p)
-Array.print(r)
-prshapes = Shapes.rotateMany(Permute(Lonpos_shapes, p), r)
+-- FindSolutions(Grid.create(5, 11), Lonpos_shapes)
 
-Shapes.printMany(prshapes)
-PlaceShapes(grid, prshapes)
+grid = Grid.create(5, 11)
+p, f = FindRandomSolution(grid, Lonpos_shapes)
+Array.print(p)
+Array.print(f)
+pshapes = Permute(Lonpos_shapes, p)
+Shapes.printMany(pshapes, f)
+PlaceShapes(grid, pshapes, f)
 Grid.print(grid)
 
 

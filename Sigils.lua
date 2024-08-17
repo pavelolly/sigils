@@ -5,16 +5,18 @@ require "Permutations"
 require "Grid"
 require "Shapes"
 
-function PlaceShape(grid, shape, row, col)
+function PlaceShape(grid, shape, form, row, col)
     if shape.Area > grid.FreeArea then
         return false
     end
 
-    row = row or 1
-    col = col or 1
+    form = form or 1
+    row  = row or 1
+    col  = col or 1
 
     local blocks = {}
-    for i, shape_row in ipairs(shape) do
+    local shape_mat = Shapes.getForm(shape, form)
+    for i, shape_row in ipairs(shape_mat) do
         for j, elem in ipairs(shape_row) do
             if elem ~= 0 then
                 local grid_row = row + i - 1
@@ -70,15 +72,15 @@ end
 -- returns position such that shape's origin is at row, col
 -- shape: 0 1, row: 1, col: 1 --> return: 1, 0
 --        1 1
-local function ShiftByOrigin(shape, row, col, search_origin_columnwise)
-    local orow, ocol = Shapes.getOrigin(shape, search_origin_columnwise)
+local function ShiftByOrigin(shape, form, row, col, search_origin_columnwise)
+    local orow, ocol = Shapes.getOrigin(shape, form, search_origin_columnwise)
     if not row or not col or not orow or not col then
         return nil
     end
     return row - orow + 1, col - ocol + 1
 end
 
-function PlaceShapes(grid, shapes, columnwise)
+function PlaceShapes(grid, shapes, forms, columnwise)
     if Shapes.area(shapes) ~= grid.FreeArea then return false end
 
     if columnwise == nil then
@@ -87,8 +89,8 @@ function PlaceShapes(grid, shapes, columnwise)
 
     for i, shape in ipairs(shapes) do
         local row, col = NextFreeBlock(grid, columnwise)
-        row, col = ShiftByOrigin(shape, row, col, columnwise)
-        if not row or not PlaceShape(grid, shape, row, col) then
+        row, col = ShiftByOrigin(shape, forms[i], row, col, columnwise)
+        if not row or not PlaceShape(grid, shape, forms[i], row, col) then
             return false
         end
     end
@@ -96,74 +98,65 @@ function PlaceShapes(grid, shapes, columnwise)
 end
 
 -- you can use this in a for loop:
--- for rshapes, rotations in RotatedShapes(shapes) do end
-function RotatedShapes(shapes, prev_rotations)
-    local rshapes = {}
-    if prev_rotations and #shapes == #prev_rotations then
-        for i, shape in ipairs(shapes) do
-            rshapes[i] = Shapes.rotate(shape, prev_rotations[i])
-        end
-    else
-        for i, shape in ipairs(shapes) do
-            rshapes[i] = DeepCopy(shape)
-        end
+-- for forms in ShapesForms(shapes) do end
+function ShapesForms(shapes, prev_forms)
+    if prev_forms then
+        prev_forms = Array.copy(prev_forms)
     end
 
     return function()
-        if not prev_rotations then
-            prev_rotations = {}
-            for i = 1,#rshapes do
-                prev_rotations[i] = 0
+        if not prev_forms then
+            prev_forms = {}
+            for i = 1,#shapes do
+                prev_forms[i] = 1
             end
         else
-            for i = #rshapes,1,-1 do
-                if prev_rotations[i] < rshapes[i].UniqueRotationsCount - 1 then
-                    prev_rotations[i] = prev_rotations[i] + 1
-                    rshapes[i] = Shapes.rotate(rshapes[i], 1)
+            for i = #shapes,1,-1 do
+                if prev_forms[i] < shapes[i].UniqueRotationsCount then
+                    prev_forms[i] = prev_forms[i] + 1
                     break
                 end
                 -- rotate back to initial state
-                rshapes[i] = Shapes.rotate(rshapes[i], -prev_rotations[i])
-                prev_rotations[i] = 0
+                prev_forms[i] = 1
 
                 if i == 1 then
-                    prev_rotations = nil
+                    prev_forms = nil
                 end
             end
         end
 
-        if (not prev_rotations) or (not next(prev_rotations)) then
+        if (not prev_forms) or (not next(prev_forms)) then
             return nil
         end
-        return Array.deepCopy(rshapes), Array.copy(prev_rotations)
+        return Array.copy(prev_forms)
     end
 end
 
--- check all rotations for shapes and yield every one that fits into grid
-function SuitableRotationsBruteForce(grid, shapes)
+-- check all forms for shapes and yield every one that fits into grid
+function SuitableFormsBruteForce(grid, shapes)
     if Shapes.area(shapes) ~= grid.FreeArea then
         return function() return nil end
     end
 
     grid = DeepCopy(grid)
     local grid_copy = DeepCopy(grid)
-    local last_rotations
+    local last_forms
     return function()
-        for rshapes, rotations in RotatedShapes(shapes, last_rotations) do
-            local could_place = PlaceShapes(grid, rshapes)
+        for forms in ShapesForms(shapes, last_forms) do
+            local could_place = PlaceShapes(grid, shapes, forms)
             grid = DeepCopy(grid_copy)
 
             if could_place then
-                last_rotations = Array.copy(rotations)
-                return rotations
+                last_forms = Array.copy(forms)
+                return forms
             end
         end
         return nil
     end
 end
 
--- check every permutation of shapes and every posiible rotations for that permutation
--- yield every suitable permutation with suitable rotations
+-- check every permutation of shapes and every posiible forms for that permutation
+-- yield every suitable permutation with suitable forms
 function SuitablePermutationsBruteForce(grid, shapes)
     if Shapes.area(shapes) ~= grid.FreeArea then
         return function() return nil end
@@ -172,13 +165,13 @@ function SuitablePermutationsBruteForce(grid, shapes)
     local last_permutation
     return function()
         for pshapes, permutation in Permutations(shapes, last_permutation) do
-            local permutationRotations = {}
-            for rotations in SuitableRotationsBruteForce(grid, pshapes) do
-                table.insert(permutationRotations, rotations)
+            local permutation_forms = {}
+            for forms in SuitableFormsBruteForce(grid, pshapes) do
+                table.insert(permutation_forms, forms)
             end
-            if next(permutationRotations) then
+            if next(permutation_forms) then
                 last_permutation = permutation
-                return permutation, permutationRotations
+                return permutation, permutation_forms
             end
         end
         return nil
@@ -194,13 +187,13 @@ function SuitablePermutationsUniqueBruteForce(grid, shapes)
     local last_permutation
     return function()
         for pshapes, permutation in PermutationsUnique(shapes, last_permutation) do
-            local permutationRotations = {}
-            for rotations in SuitableRotationsBruteForce(grid, pshapes) do
-                table.insert(permutationRotations, rotations)
+            local permutation_forms = {}
+            for forms in SuitableFormsBruteForce(grid, pshapes) do
+                table.insert(permutation_forms, forms)
             end
-            if next(permutationRotations) then
+            if next(permutation_forms) then
                 last_permutation = permutation
-                return permutation, permutationRotations
+                return permutation, permutation_forms
             end
         end
         return nil
@@ -211,7 +204,8 @@ end
 -- debug can have:
 -- -- print_info
 -- -- prev_permutation
--- -- prev_rotations
+-- -- stop_permutation
+-- -- prev_forms
 -- -- number_permutations_to_inspect
 -- -- number_solutions_to_inspect
 function SuitablePlacements(grid, shapes, debug)
@@ -243,9 +237,9 @@ function SuitablePlacements(grid, shapes, debug)
     if debug.prev_permutation then
         prev_permutation = Array.copy(debug.prev_permutation)
     end
-    local prev_rotations
-    if debug.prev_rotations then
-        prev_rotations = Array.copy(debug.prev_rotations)
+    local prev_forms
+    if debug.prev_forms then
+        prev_forms = Array.copy(debug.prev_forms)
     end
     local wrong_shape_max_idx = 0
 
@@ -255,13 +249,13 @@ function SuitablePlacements(grid, shapes, debug)
     local solutions_found = 0
 
     -- to skip some of rotataions when jumping to next permutation
-    local prefix_rotations = {}
+    local prefix_forms = {}
 
-    local function CutPrefixRotations(permutation, next_permutation)
+    local function CutPrefixForms(permutation, next_permutation)
         for i = 1,length do
             if permutation[i] ~= next_permutation[i] then
                 for j = i, length do
-                    prefix_rotations[j] = nil
+                    prefix_forms[j] = nil
                 end
                 break
             end
@@ -270,43 +264,42 @@ function SuitablePlacements(grid, shapes, debug)
 
     return function()
         local permutation = prev_permutation or GetInitialPermutation(shapes)
-        local rotations
+        local forms
         repeat
-            if debug.number_permutations_to_inspect and permutations_visited >= debug.number_permutations_to_inspect then
+            if debug.number_permutations_to_inspect and permutations_visited >= debug.number_permutations_to_inspect or
+               debug.number_solutions_to_inspect and solutions_found >= debug.number_solutions_to_inspect            or
+               debug.stop_permutation and Array.lessThanOrEqual(debug.stop_permutation, permutation)
+            then
                 break
             end
 
-            if debug.number_solutions_to_inspect and solutions_found >= debug.number_solutions_to_inspect then
-                break
-            end
-
-            -- prepare permuted shapes and rotations
+            -- prepare permuted shapes and forms
             local pshapes = Permute(shapes, permutation)
 
-            local save_prefix_rotations = true
+            local save_prefix_forms = true
 
-            if not rotations and prev_rotations then
+            if not forms and prev_forms then
                 -- this block is supposed to be run only on the first iteration
 
-                -- jump to next rotations
-                local zeros_cnt = 0
+                -- jump to next forms
+                local resets_cnt = 0
                 for i = length,1,-1 do
-                    prev_rotations[i] = (prev_rotations[i] + 1) % pshapes[i].UniqueRotationsCount
-                    if prev_rotations[i] ~= 0 then
+                    prev_forms[i] = ( (prev_forms[i] + 1) - 1) % pshapes[i].UniqueRotationsCount + 1
+                    if prev_forms[i] ~= 1 then
                         break
                     end
-                    zeros_cnt = zeros_cnt + 1
+                    resets_cnt = resets_cnt + 1
                 end
-                rotations = prev_rotations
+                forms = prev_forms
 
-                -- if as the result rotations == {0, 0, ..., 0}
+                -- if as the result forms == {1, 1, ..., 1}
                 -- then also jump to next permutation
-                if zeros_cnt == length then
+                if resets_cnt == length then
                     local next_permutation = Array.copy(permutation)
                     if not NextPermutation(next_permutation) then
                         return nil
                     end
-                    CutPrefixRotations(permutation, next_permutation)
+                    CutPrefixForms(permutation, next_permutation)
                     permutation = next_permutation
                     wrong_shape_max_idx = 0
 
@@ -316,17 +309,17 @@ function SuitablePlacements(grid, shapes, debug)
                     permutations_visited = permutations_visited - 1
                 end
 
-                -- forbid saving prefix rotations as we are kind of continuing doing work of previuos call 
-                save_prefix_rotations = false
+                -- forbid saving prefix forms as we are kind of continuing doing work of previuos call 
+                save_prefix_forms = false
             else
-                rotations = rotations or {}
+                forms = forms or {}
                 local i = 1
-                while prefix_rotations[i] do
-                    rotations[i] = prefix_rotations[i]
+                while prefix_forms[i] do
+                    forms[i] = prefix_forms[i]
                     i = i + 1
                 end
                 for j = i,length do
-                    rotations[j] = 0
+                    forms[j] = 1
                 end
             end
             
@@ -338,25 +331,26 @@ function SuitablePlacements(grid, shapes, debug)
                 print("Dealing with permutaion: "..Array.tostring(permutation))
                 print("Shapes:")
                 Shapes.printMany(pshapes)
-                print("And rotations: "..Array.tostring(rotations))
+                print("And forms: "..Array.tostring(forms))
                 print()
             end
 
-            -- try to place pshapes with different rotations
+            -- try to place pshapes with different forms
             local cur_shape_idx = 1
             while 0 < cur_shape_idx and cur_shape_idx <= length do
                 local could_place = false
-                while rotations[cur_shape_idx] < pshapes[cur_shape_idx].UniqueRotationsCount do
+                while forms[cur_shape_idx] <= pshapes[cur_shape_idx].UniqueRotationsCount do
 
                     if debug.print_info then
-                        print("Try shape #"..cur_shape_idx.." rotated "..rotations[cur_shape_idx].." times")
+                        print("Try shape #"..cur_shape_idx.." rotated "..forms[cur_shape_idx].." times")
                     end
 
                     total_visited = total_visited + 1
 
-                    local shape = Shapes.rotate(pshapes[cur_shape_idx], rotations[cur_shape_idx])
+                    local shape = pshapes[cur_shape_idx]
+                    local form  = forms[cur_shape_idx]
                     local row, col = NextFreeBlock(grid, search_next_free_block_columnwise)
-                    row, col = ShiftByOrigin(shape, row, col, search_next_free_block_columnwise)
+                    row, col = ShiftByOrigin(shape, form, row, col, search_next_free_block_columnwise)
                     assert(row, "There is no place for shape")
 
                     if debug.print_info then
@@ -364,18 +358,18 @@ function SuitablePlacements(grid, shapes, debug)
                         print("At: ("..row..", "..col..")")
                     end
 
-                    could_place = PlaceShape(grid, shape, row, col)
+                    could_place = PlaceShape(grid, shape, form, row, col)
                     if could_place then
                         if debug.print_info then
                             print("Placed shape #"..cur_shape_idx.."; Grid:")
                             Matrix.print(grid)
                         end
 
-                        if save_prefix_rotations then
-                            prefix_rotations[cur_shape_idx] = rotations[cur_shape_idx]
+                        if save_prefix_forms then
+                            prefix_forms[cur_shape_idx] = forms[cur_shape_idx]
 
                             if debug.print_info then
-                                print("Saved to prefix_rotations["..cur_shape_idx.."] = "..rotations[cur_shape_idx])
+                                print("Saved to prefix_forms["..cur_shape_idx.."] = "..forms[cur_shape_idx])
                                 print()
                             end
                         end
@@ -385,7 +379,7 @@ function SuitablePlacements(grid, shapes, debug)
 
                     -- could not place here
 
-                    rotations[cur_shape_idx] = rotations[cur_shape_idx] + 1
+                    forms[cur_shape_idx] = forms[cur_shape_idx] + 1
 
                     if debug.print_info then
                         print("Could not place shape #"..cur_shape_idx)
@@ -395,19 +389,19 @@ function SuitablePlacements(grid, shapes, debug)
                 end
 
                 if not could_place then
-                    save_prefix_rotations = false
+                    save_prefix_forms = false
 
                     if debug.print_info then
-                        print("Stop rotating shape #"..cur_shape_idx)
+                        print("Stop bure forcing shape #"..cur_shape_idx)
                     end
 
                     if cur_shape_idx > wrong_shape_max_idx then        
                         -- remember number of shape which we failed to place
                         wrong_shape_max_idx = cur_shape_idx
                     end
-                    -- if could not place shape at current index go back and try to rotate one of prev shapes
-                    while cur_shape_idx > 0 and pshapes[cur_shape_idx].UniqueRotationsCount - rotations[cur_shape_idx] <= 1 --[[0 or 1]] do
-                        rotations[cur_shape_idx] = 0
+                    -- if could not place shape at current index go back and try to switch form one of prev shapes
+                    while cur_shape_idx > 0 and pshapes[cur_shape_idx].UniqueRotationsCount - forms[cur_shape_idx] <= 0 --[[-1 or 0]] do
+                        forms[cur_shape_idx] = 1
                         cur_shape_idx = cur_shape_idx - 1
                         if cur_shape_idx >= 1 then
                             RemoveLastShape(grid)
@@ -425,11 +419,11 @@ function SuitablePlacements(grid, shapes, debug)
                         break
                     end
 
-                    rotations[cur_shape_idx] = rotations[cur_shape_idx] + 1
+                    forms[cur_shape_idx] = forms[cur_shape_idx] + 1
                 else
                     cur_shape_idx = cur_shape_idx + 1
                 end
-                if 0 < cur_shape_idx and cur_shape_idx <= #pshapes then
+                if 0 < cur_shape_idx and cur_shape_idx <= length then
 
                     if debug.print_info then
                         print("Moving to shape #"..cur_shape_idx)
@@ -440,7 +434,7 @@ function SuitablePlacements(grid, shapes, debug)
 
             if debug.print_info then
                 print("Done with permutation: "..Array.tostring(permutation))
-                print("Having rotations: "..Array.tostring(rotations))
+                print("Having forms: "..Array.tostring(forms))
                 print()
             end
          
@@ -458,26 +452,26 @@ function SuitablePlacements(grid, shapes, debug)
                 end
 
                 prev_permutation = permutation
-                prev_rotations = rotations
+                prev_forms = forms
                 solutions_found = solutions_found + 1
 
                 if debug.print_info then
                     print("Found solution #"..solutions_found)
                 end
 
-                return Array.copy(permutation), Array.copy(rotations)
+                return Array.copy(permutation), Array.copy(forms)
             end
 
             local next_permutation = Array.copy(permutation)
             local next_permutation_exists = NextPermutationSkipPrefix(next_permutation, wrong_shape_max_idx)
             if next_permutation_exists then
-                CutPrefixRotations(permutation, next_permutation)
+                CutPrefixForms(permutation, next_permutation)
                 permutation = next_permutation
                 wrong_shape_max_idx = 0
 
                 if debug.print_info then
                     print("Going to the next permutation, skipping prefix of length "..wrong_shape_max_idx)
-                    print("Saving rotations: "..Array.tostring(prefix_rotations))
+                    print("Saving forms: "..Array.tostring(prefix_forms))
                 end
 
             end
@@ -535,8 +529,8 @@ end
 
 -- lua -lSigils -e "for p, r in SuitablePlacements(Grid.create(4, 4), {Shapes.Talos.Z, Shapes.Talos.L, Shapes.Talos.I, Shapes.Talos.J}, {print_info = true}) do end"
 
-function FindAnySolution(grid, shapes, start_permutation)
-    for p, r in SuitablePlacements(grid, shapes, {prev_permutation = start_permutation}) do
+function FindAnySolution(grid, shapes, start_permutation, stop_permutaion)
+    for p, r in SuitablePlacements(grid, shapes, {prev_permutation = start_permutation, stop_permutaion = stop_permutaion}) do
         return p, r
     end
     return nil
@@ -545,5 +539,9 @@ end
 function FindRandomSolution(grid, shapes)
     local init_per = GetInitialPermutation(shapes)
     Array.shuffle(init_per)
-    return FindAnySolution(grid, shapes, init_per)
+    p, f = FindAnySolution(grid, shapes, init_per)
+    if p then
+        return p, f
+    end
+    return FindAnySolution(grid, shapes, nil, init_per)
 end

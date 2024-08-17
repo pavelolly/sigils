@@ -1,2 +1,5 @@
 # debug folder
 Debug/
+
+# lua compiler output
+*.out

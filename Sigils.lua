@@ -481,10 +481,32 @@ function SuitablePlacements(grid, shapes, debug)
             print("Done")
         end
         
+        PrintDebug(debug, "=========== Debug Settings Used ===========")
+        print()
         PrintStatistics(shapes, permutations_visited, total_visited, "=========== SuitablePlacements Statistic ==============")
         
         return nil
     end
+end
+
+function PrintDebug(debug, header)
+    if not debug or not next(debug) then return end
+    if header then io.write(header) io.write("\n") end
+
+    function _print(o, name, f)
+        f = f or function(o) return o end
+        if o then
+            print(name..": "..f(o))
+        else
+            print(name..": nil")
+        end
+    end
+
+    _print(debug.prev_permutation, "prev_permutations", Array.tostring)
+    _print(debug.stop_permutation, "stop_permutation", Array.tostring)
+    _print(debug.prev_forms, "prev_forms", Array.tostring)
+    _print(debug.number_permutations_to_inspect, "number_permutations_to_inspect")
+    _print(debug.number_solutions_to_inspect, "number_solutions_to_inspect")
 end
 
 local function factorial(n)

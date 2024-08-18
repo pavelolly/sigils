@@ -22,6 +22,9 @@
 [x] add reflections besides rotations
     !! apparently became a huge optimization
 
+[x] parallel brute forcing
+[-] generate scripts for parallel brute forcing
+
 [-] do some extra memory tweaks to optimize the program
 
 [-] make visualisation embedding this project into C++ program

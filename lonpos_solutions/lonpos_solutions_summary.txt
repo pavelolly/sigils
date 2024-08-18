@@ -1,0 +1,5 @@
+Found 371001 solutions
+-- (incorrect because it must be divisible by 4: i either lost solutions by setting wrong parameters or because of calculations errors i've done getting this value)
+
+Permutations visited: 34879104 / 479001600 (7.282 %)
+Total Iterations:     13845682305 / 8036313307545600 (~0 %)

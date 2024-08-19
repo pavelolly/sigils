@@ -2,11 +2,11 @@ require "Sigils"
 
 function FindSolutions(grid, shapes)
     local res = {}
-    local debug = {prev_permutation = {1,12,11,10,9,8,7,6,5,4,3,2}, number_permutations_to_inspect = 1}
+    -- local options = {prev_permutation = {1,12,11,10,9,8,7,6,5,4,3,2}, number_permutations_to_inspect = 1}
     start = os.clock()
-    for p, r in SuitablePlacements(grid, shapes, debug) do
+    for p, r in SuitablePlacements(grid, shapes, options) do
         table.insert(res, {p, r})
-        print("{"..Array.tostring(p)..", "..Array.tostring(r).."}")
+        -- print("{"..Array.tostring(p)..", "..Array.tostring(r).."}")
         -- break
         -- print("Permutaion: "..Array.tostring(p))
         -- print("Rotations:  "..Array.tostring(r))
@@ -49,15 +49,15 @@ end
 -- Found 24 solutions
 -- Time taken: 0.047s
 -- Faster because you don't rotate shapes over and over: you just take predefined matrices
--- FindSolutions(Grid.create(4, 7), {
---     Shapes.Talos.S,
---     Shapes.Talos.S,
---     Shapes.Talos.T,
---     Shapes.Talos.T,
---     Shapes.Talos.L,
---     Shapes.Talos.J,
---     Shapes.Talos.I
--- })
+FindSolutions(Grid.create(4, 7), {
+    Shapes.Talos.S,
+    Shapes.Talos.S,
+    Shapes.Talos.T,
+    Shapes.Talos.T,
+    Shapes.Talos.L,
+    Shapes.Talos.J,
+    Shapes.Talos.I
+})
 
 -- First iteration
 -- =========== SuitablePlacements Statistic ==============
@@ -168,18 +168,18 @@ end
 -- should take between 2 and 5 hours
 -- one solution is found in 0.39s
 --
-FindSolutions(Grid.create(5, 11), {
-    Shapes.Lonpos.Corner,
-    Shapes.Lonpos.CornerBig,
-    Shapes.Lonpos.Square,
-    Shapes.Lonpos.I,
-    Shapes.Lonpos.L,
-    Shapes.Lonpos.LBig,
-    Shapes.Lonpos.X,
-    Shapes.Lonpos.Clip,
-    Shapes.Lonpos.Zig,
-    Shapes.Lonpos.Snake,
-    Shapes.Lonpos.Crane,
-    Shapes.Lonpos.Chocolate
-})
+-- FindSolutions(Grid.create(5, 11), {
+--     Shapes.Lonpos.Corner,
+--     Shapes.Lonpos.CornerBig,
+--     Shapes.Lonpos.Square,
+--     Shapes.Lonpos.I,
+--     Shapes.Lonpos.L,
+--     Shapes.Lonpos.LBig,
+--     Shapes.Lonpos.X,
+--     Shapes.Lonpos.Clip,
+--     Shapes.Lonpos.Zig,
+--     Shapes.Lonpos.Snake,
+--     Shapes.Lonpos.Crane,
+--     Shapes.Lonpos.Chocolate
+-- })
 

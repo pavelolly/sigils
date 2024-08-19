@@ -14,6 +14,7 @@ function TEST_Shapes_getOrigin()
                                                      {0, 0, 1},
                                                      {1, 1, 0}}
                                                     },
+                                           Area = 3,
                                            UniqueRotationsCount = 1})
 
     Test.ExpectEqual(rows1, 1, "(L, -1) origin row wrong")
@@ -46,6 +47,7 @@ function TEST_Shapes_getOrigin_columnwise()
                                                      {0, 0, 1},
                                                      {1, 1, 0}}
                                                     },
+                                           Area = 3,
                                            UniqueRotationsCount = 1}, 1, true)
 
     Test.ExpectEqual(rows1, 2, "(L, -1) origin row wrong")

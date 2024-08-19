@@ -414,16 +414,42 @@ Shapes = {
     }
 }
 
-function Shapes.print(shape, form)
-    Matrix.print(Shapes.getForm(shape, form))
-    print("UniqueRotationsCount:", shape.UniqueRotationsCount)
-    print("Area:", shape.Area)
+function Shapes.valid(shape)
+    if type(shape) ~= "table" then
+        return false, "not a table"
+    end
+    if not shape.Forms then
+        return false, "shape.Forms is nil"
+    end
+    if not shape.Area then
+        return false, "shape.Area is nil"
+    end
+    if not shape.UniqueRotationsCount then
+        return false, "shape.UniqueRotationsCount is nil"
+    end
+    return true
+end
+
+function Shapes.assertValidArg(arg, func_name, arg_number)
+    AssertValidArg(Shapes.valid, arg, func_name, arg_number)
 end
 
 -- returns matrix of shape's form
 function Shapes.getForm(shape, form)
-    local idx = ((form or 1) - 1) % shape.UniqueRotationsCount + 1
+    form = form or 1
+    -- assert(IsTable(shape) and IsInteger(form))
+
+    local idx = (form - 1) % shape.UniqueRotationsCount + 1
     return shape.Forms[idx]
+end
+
+function Shapes.print(shape, form)
+    form = form or 1
+    -- assert(IsTable(shape) and IsInteger(form))
+
+    Matrix.print(Shapes.getForm(shape, form))
+    print("Area:",                 shape.Area)
+    print("UniqueRotationsCount:", shape.UniqueRotationsCount)
 end
 
 -- pretty
@@ -433,6 +459,7 @@ end
 --                           1
 function Shapes.printMany(shapes, forms)
     forms = forms or {}
+    -- assert(IsTable(shapes) and IsTable(forms))
 
     local cols_numbers = {}
     local max_rows = -1
@@ -473,9 +500,12 @@ function Shapes.printMany(shapes, forms)
 end
 
 function Shapes.area(shapes)
+    -- assert(IsTable(shapes))
+
     local val = 0
-    for _, shape in ipairs(shapes) do
-        if not shape.Area then return nil end
+    for i, shape in ipairs(shapes) do
+        assert(IsTable(shape))
+
         val = val + shape.Area
     end
     return val
@@ -492,14 +522,32 @@ function Shapes.getOrigin(shape, form, columnwise)
     return Matrix.findIf(Shapes.getForm(shape, form), function(elem) return elem ~= 0 end, columnwise)
 end
 
-function Shapes.equals(shape1, shape2)
-    if shape1.Area ~= shape2.Area or shape1.UniqueRotationsCount ~= shape2.UniqueRotationsCount then
+function Shapes.equals(shape, other)
+    -- assert(IsTable(shape) and IsTable(other))
+
+    if shape.Area ~= other.Area or shape.UniqueRotationsCount ~= other.UniqueRotationsCount then
         return false
     end
 
-    return Matrix.equals(shape1.Forms[1], shape2.Forms[1])
+    return Matrix.equals(shape.Forms[1], other.Forms[1])
 end
 
+function Shapes.validForms(shapes, forms)
+    -- assert(IsTable(shape) and IsTable(forms))
+
+    if #shapes ~= #forms then
+        return false
+    end
+
+    for i, shape in ipairs(shapes) do
+        if not Shapes.valid(shape) and math.type(forms[i]) ~= "integer" and forms[i] > shape.UniqueRotationsCount then
+            return false
+        end
+    end
+    return true
+end
+
+-- setting metatables for predefine shapes
 for k,v in pairs(Shapes.Talos) do
     setmetatable(v, {__eq = Shapes.equals, print = Shapes.print})
 end

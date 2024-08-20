@@ -3,3 +3,6 @@ Debug/
 
 # lua compiler output
 *.out
+
+# generated files
+lonpos_solutions/

@@ -124,7 +124,7 @@ function NextPermutationSkipPrefix(prev_per, prefix_len)
 end
 
 function GetInitialPermutation(array)
-    -- assert(IsTable(array))
+    Array.assertValidArg(array, "GetInitialPermutaion")
 
     local per = {}
     local seen = {}
@@ -150,7 +150,7 @@ function GetInitialPermutation(array)
 end
 
 function Permutations(array, prev_per)
-    -- assert(IsTable(array))
+    Array.assertValidArg(array, "Permutations", 1)
 
     local init_per = {}
     for i = 1,#array do
@@ -174,7 +174,7 @@ function Permutations(array, prev_per)
 end
 
 function PermutationsUnique(array, prev_per)
-    -- assert(IsTable(array))
+    Array.assertValidArg(array, "PermutationsUnique", 1)
 
     local init_per = GetInitialPermutation(array)
     assert(not prev_per or IsPermutation(prev_per, init_per), "PermutationsUnique: prev_per must be permutation of "..Array.tostring(init_per))
@@ -192,4 +192,158 @@ function PermutationsUnique(array, prev_per)
 
         return Permute(array, prev_per), Array.copy(prev_per)
     end
+end
+
+function Factorial(n)
+    local res = 1
+    for i = 1,n do
+        res = res * i
+    end
+    return res
+end
+
+function NumberOfPermutations(array)
+    local per = GetInitialPermutation(array)
+    local number_permutations = Factorial(#per)
+    local seen = {}
+    for i, e in ipairs(per) do
+        if not Array.find(seen, e) then
+            number_permutations = number_permutations / Factorial(Array.count(per, e))
+            table.insert(seen, e)
+        end
+    end
+    return math.tointeger(number_permutations)
+end
+
+-- returns ordinal number of given permutation in a list of all unique permutations sorted lexicographically
+function OrdinalOfPermutation(permutation)
+    Array.assertValidArg(permutation, "OrdinalOfPermutation")
+
+    local current_permutation = Array.copy(permutation)
+    table.sort(current_permutation)
+
+    local len = #permutation
+    local ordinal = 1
+    while not Array.equals(current_permutation, permutation) do
+        local idx = 0
+        local first_different = Array.findIf(permutation, function(e) idx = idx + 1; return e ~= current_permutation[idx] end)
+        assert(first_different)
+
+        local suffix = Array.sub(current_permutation, first_different + 1)
+        ordinal = ordinal + NumberOfPermutations(suffix)
+        NextPermutationSkipPrefix(current_permutation, first_different)
+    end
+    return ordinal
+end
+
+function NextPermutationSkipNumber(permutation, number)
+    -- Array.assertValidArg(permutation, "NextPermutationSkipNumber", 1)
+    -- assert(IsInteger(number) and number >= 0, "NextPermutationSkipNumber: number must be non-negative integer")
+
+    if number == 0 then
+        return true
+    end
+
+    local total_permutations  = NumberOfPermutations(permutation)
+    local ordinal_permutation = OrdinalOfPermutation(permutation)
+
+    if number > total_permutations - ordinal_permutation then
+        return false
+    end
+
+    local len = #permutation
+    local current_permutation = Array.copy(permutation)
+
+    while number > 0 do
+        local prefix_len = len - 1
+        
+        local permutations_to_skip = 1
+        while prefix_len > 1 do
+            local suffix = Array.sub(current_permutation, prefix_len)
+            local permutations_to_skip_ahead = NumberOfPermutations(suffix) - OrdinalOfPermutation(suffix) + 1
+
+            if permutations_to_skip_ahead > number then
+                break
+            end
+
+            permutations_to_skip = permutations_to_skip_ahead
+            prefix_len = prefix_len - 1
+        end
+
+        if not NextPermutationSkipPrefix(current_permutation, prefix_len) then
+            return false
+        end
+
+        number = number - permutations_to_skip
+    end
+    
+    -- copy result to outside world
+    for i = 1,len do
+        permutation[i] = current_permutation[i]
+    end
+    return true
+end
+
+-- get permutation by its ordinal in a list of permutation defined by 'permutation' parameter and sorted lexicographically
+-- if no such permutation returns nil
+function GetPermutationByOrdinal(permutation, ordinal)
+    Array.assertValidArg(permutation, "GetPermutaionByOrdinal", 1)
+    assert(IsInteger(ordinal) and ordinal > 0, "GetPermutaionByOrdinal: ordinal must be postive integer")
+
+    local init_permutation = Array.copy(permutation)
+    table.sort(init_permutation)
+
+    if NextPermutationSkipNumber(init_permutation, ordinal - 1) then
+        return init_permutation
+    else
+        return nil
+    end
+end
+
+function CutPermutationsSequence(start_permutation, end_permutation, nchunks)
+    assert(start_permutation or end_permutation, "CutPermutationsSequence: at least one of start_permutation and end_permutation must be non-nil")
+
+    if start_permutation then
+        Array.assertValidArg(start_permutation, "CutPermutationsSequence", 2)
+    end
+    if end_permutation then
+        Array.assertValidArg(end_permutation, "CutPermutationsSequence", 3)
+    end
+    assert(IsInteger(nchunks) and nchunks > 0, "CutPermutationsSequence: nchunks must be positive integer")
+
+    if not start_permutation then
+        start_permutation = Array.copy(end_permutation)
+        table.sort(start_permutation)
+    end
+    if not end_permutation then
+        end_permutation = Array.copy(start_permutation)
+        table.sort(end_permutation)
+        Array.reverse(end_permutation)
+    end
+
+    assert(IsPermutation(start_permutation, end_permutation), "CutPermutationSequence: start_permutation is not permutation of end_permutation and vice versa")
+
+    local permutations_range_len = OrdinalOfPermutation(end_permutation) - OrdinalOfPermutation(start_permutation) + 1
+    local permutations_chunk_len = permutations_range_len // nchunks
+
+    if permutations_chunk_len < 0 then
+        return {}
+    end
+
+    if permutations_chunk_len == 0 then
+        permutations_chunk_len = 1
+        nchunks = #start_permutation
+    end
+
+    local ranges = {}
+    local p = start_permutation
+    for i = 1,nchunks-1 do
+        local p2 = Array.copy(p)
+        assert(NextPermutationSkipNumber(p, permutations_chunk_len - 1))
+        table.insert(ranges, {p2, Array.copy(p)})
+        assert(NextPermutation(p))
+    end
+    table.insert(ranges, {p, end_permutation})
+
+    return ranges
 end

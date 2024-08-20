@@ -2,6 +2,9 @@ require "Test"
 Test.exitOnExpectationFailure = true
 
 require "TestPermutations"
+require "TestOrdinalOFPermutation"
+require "TestNextPermutationSkipNumber"
+require "TestCutPermutaionSequence"
 -- require "TestRotate"
 require "TestShapesSame"
 require "TestPermutaitonsOfShapes"

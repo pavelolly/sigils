@@ -84,7 +84,26 @@ function Array.lessThanOrEqual(array, other)
         end
     end
 
-    return len_min == len_array
+    return len_array <= len_other
+end
+
+function Array.lessThan(array, other)
+    -- assert(IsTable(array) and IsTable(other))
+
+    local len_array = #array
+    local len_other = #other
+    local len_min = len_array < len_other and len_array or len_other
+    
+    for i = 1, len_min do
+        if array[i] < other[i] then
+            return true
+        end
+        if array[i] > other[i] then
+            return false
+        end
+    end
+
+    return len_array < len_other
 end
 
 function Array.sub(array, s, e)
@@ -129,7 +148,7 @@ function Array.findIf(array, func)
     -- assert(IsTable(array) and IsCallable(func))
 
     for i, e in ipairs(array) do
-        if func(e) then return i end
+        if func(e, i) then return i end
     end
     return nil
 end
@@ -144,4 +163,4 @@ function Array.count(array, value)
     return cnt
 end
 
-Array.metatable = {__eq = Array.equals, __le = Array.lessThanOrEqual, print = Array.print}
+Array.metatable = {__eq = Array.equals, __lt = Array.lessThan, __le = Array.lessThanOrEqual, print = Array.print}

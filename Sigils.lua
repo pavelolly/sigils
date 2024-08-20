@@ -238,7 +238,7 @@ function SuitablePlacements(grid, shapes, options)
 
     options = options or {}
     assert(IsTable(options), "SuitablePlacements: options is not a table")
-    assert(not options.prev_permutation or IsPermutation(options.prev_permutaion, init_per),
+    assert(not options.prev_permutation or IsPermutation(options.prev_permutation, init_per),
            "SuitablePlacements: options.prev_premutation is not permutation of initial permutation of shapes which is: "..Array.tostring(init_per))
     assert(not options.stop_permutation or IsPermutation(options.stop_permutation, init_per),
            "SuitablePlacements: options.stop_permutation is not permutation of initial permutation of shapes which is: "..Array.tostring(init_per))
@@ -307,7 +307,7 @@ function SuitablePlacements(grid, shapes, options)
         repeat
             if options.number_permutations_to_inspect and permutations_visited >= options.number_permutations_to_inspect or
                options.number_solutions_to_inspect    and solutions_found >= options.number_solutions_to_inspect         or
-               options.stop_permutation               and Array.lessThanOrEqual(options.stop_permutation, permutation)
+               options.stop_permutation               and Array.lessThan(options.stop_permutation, permutation)
             then
                 break
             end
@@ -453,7 +453,7 @@ function SuitablePlacements(grid, shapes, options)
 
                         end
                     end
-                    -- print()
+
                     if cur_shape_idx <= 0 then
                         -- goto next permutation
                         break
@@ -538,44 +538,28 @@ function PrintOptions(options, header)
     print()
 end
 
-local function factorial(n)
-    local res = 1
-    for i = 1,n do
-        res = res * i
-    end
-    return res
-end
-
 function PrintStatistics(shapes, permutations_visited, total_visited, header)
     if header then io.write(header) io.write("\n") end
 
-    local seen = {}
-    local init_per = GetInitialPermutation(shapes)
-    local permutaitonsCount = factorial(#shapes)
-    for i, e in ipairs(init_per) do
-        if not Array.find(seen, e) then
-            permutaitonsCount = permutaitonsCount / factorial(Array.count(init_per, e))
-            table.insert(seen, e)
-        end
-    end
-    permutaitonsCount = math.tointeger(permutaitonsCount)
-    print(string.format("Permutaitons visited:      %d / %d (%.3f %%) / %d (%.3f %%)",
+    local permutations_count = NumberOfPermutations(shapes)
+    local w = 4
+    print(string.format("Permutaitons visited:      %d / %d (%."..w.."f %%) / %d (%."..w.."f %%)",
                          permutations_visited,
-                         permutaitonsCount,
-                         permutations_visited / permutaitonsCount * 100,
-                         factorial(#shapes),
-                         permutations_visited / factorial(#shapes) * 100))
+                         permutations_count,
+                         permutations_visited / permutations_count * 100,
+                         Factorial(#shapes),
+                         permutations_visited / Factorial(#shapes) * 100))
 
-    local rotationsPerPermutaionCount = 1
+    local forms_per_permutations = 1
     for i = 1,#shapes do
-        rotationsPerPermutaionCount = rotationsPerPermutaionCount * shapes[i].UniqueRotationsCount
+        forms_per_permutations = forms_per_permutations * shapes[i].UniqueRotationsCount
     end
-    print(string.format("Total Iterations visited:  %d / %d (%.3f %%) / %d (%.3f %%)",
+    print(string.format("Total Iterations visited:  %d / %d (%."..w.."f %%) / %d (%."..w.."f %%)",
                          total_visited,
-                         permutaitonsCount * rotationsPerPermutaionCount,
-                         total_visited / (permutaitonsCount * rotationsPerPermutaionCount) * 100,
-                         factorial(#shapes) * rotationsPerPermutaionCount,
-                         total_visited / (factorial(#shapes) * rotationsPerPermutaionCount) * 100))
+                         permutations_count * forms_per_permutations,
+                         total_visited / (permutations_count * forms_per_permutations) * 100,
+                         Factorial(#shapes) * forms_per_permutations,
+                         total_visited / (Factorial(#shapes) * forms_per_permutations) * 100))
 end
 
 -- lua -lSigils -e "for p, r in SuitablePlacements(Grid.create(4, 4), {Shapes.Talos.Z, Shapes.Talos.L, Shapes.Talos.I, Shapes.Talos.J}, {print_debug_info = true}) do end"

@@ -31,13 +31,13 @@ file = io.open(filename, "w+")
 
 local t1 = os.clock()
 
-print("Process number: "..process_name.."\n"..
+print("Process: "..process_name.."\n"..
       "Start permutaiton: "..(start_permutation and Array.tostring(start_permutation) or "nil").."\n"..
       "End permutaiton:   "..(end_permutation   and Array.tostring(end_permutation)   or "nil").."\n"..
       "Started")
 
 
--- grid and shapes must be defined outside this file
+-- grid and shapes must be defined outside of this file
 for p, f in SuitablePlacements(grid, shapes, {prev_permutation = start_permutation, stop_permutation = end_permutation}) do
     file:write("{"..Array.tostring(p)..", "..Array.tostring(f).."}\n")
 end

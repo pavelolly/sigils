@@ -58,9 +58,10 @@ function NextPermutation(prev_per)
 
     -- find largest l > j such that prev_per[l] > prev_per[j]
     local l = j + 1
-    for i = j + 2,len do
+    for i = len,l,-1 do
         if prev_per[i] > prev_per[j] then
             l = i
+            break
         end
     end
 

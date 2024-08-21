@@ -528,14 +528,21 @@ function SuitablePlacements(grid, shapes, options)
     end
 end
 
+-- -- print_debug_info
+-- -- prev_permutation
+-- -- stop_permutation
+-- -- prev_forms
+-- -- number_permutations_to_inspect
+-- -- number_solutions_to_inspect
 function PrintOptions(options, header)
     if not options or not next(options) then return end
     if header then io.write(header) io.write("\n") end
 
-    for k, v in pairs(options) do
-        print(k, v)
-    end
-    print()
+    if options.prev_permutation then print("prev_permutation: "..Array.tostring(options.prev_permutation)) end
+    if options.stop_permutation then print("stop_permutation: "..Array.tostring(options.stop_permutation)) end
+    if options.prev_forms       then print("prev_forms: "..Array.tostring(options.prev_forms))             end
+    if options.number_permutations_to_inspect then print("number_permutations_to_inspect: "..number_permutations_to_inspect) end
+    if options.number_solutions_to_inspect    then print("number_solutions_to_inspect: "..number_solutions_to_inspect)       end
 end
 
 function PrintStatistics(shapes, permutations_visited, total_visited, header)

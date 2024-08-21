@@ -33,24 +33,30 @@ function GenereteScript(filename, script_type, setup_lua_filename, start_permuta
 
     if script_type == ScriptType.Batch then
         script_file:write("@echo off\n")
-        script_file:write("\n")
-        script_file:write("\n")
-        for i, range in ipairs(ranges) do
-            local s = "nil"
-            local e = "nil"
-            if range[1] then
-                s = Array.tostring(range[1])
-            end
-            if range[2] then
-                e = Array.tostring(range[2])
-            end
-            script_file:write("start /B lua -e \"dofile '"..setup_lua_filename.."'\" Solve/Solve.lua "..filename.."_"..i.." \""..s.."\" \""..e.."\"\n")
-        end
     else
-        print("ERROR: Generating bash scripts is not implemented")
+        script_file:write("#!/usr/bin/bash\n")
+    end
+        
+    script_file:write("\n")
+    script_file:write("\n")
+    for i, range in ipairs(ranges) do
+        local s = "nil"
+        local e = "nil"
+        if range[1] then
+            s = Array.tostring(range[1])
+        end
+        if range[2] then
+            e = Array.tostring(range[2])
+        end
+        local lua_command = "lua -e \"dofile '"..setup_lua_filename.."'\" Solve.lua "..filename.."_"..i.." \""..s.."\" \""..e.."\""
+        if script_type == ScriptType.Batch then
+            script_file:write("start /B "..lua_command.."\n")
+        else
+            script_file:write(lua_command.." &\n")
+        end
     end
 
     script_file:close()
 end
 
-GenereteScript("TEST", ScriptType.Batch, "Solve/SETUP.lua", nil, nil, 4)
+GenereteScript("SolveLonpos", ScriptType.Bash, "SolveLonposSetup.lua", nil, nil, 12)

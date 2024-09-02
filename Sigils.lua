@@ -122,7 +122,7 @@ function ShapesForms(shapes, prev_forms)
             end
         else
             for i = #shapes,1,-1 do
-                if prev_forms[i] < shapes[i].UniqueRotationsCount then
+                if prev_forms[i] < shapes[i].UniqueFormsCount then
                     prev_forms[i] = prev_forms[i] + 1
                     break
                 end
@@ -219,9 +219,51 @@ function SuitablePermutationsUniqueBruteForce(grid, shapes)
     end
 end
 
+local function PrintOptions(options, header, printFunc)
+    printFunc = printFunc or print
+    assert(IsCallable(printFunc), "PrintOptions: printFunc is not a callable object")
+
+    if not options or not next(options) then return end
+    if header then io.write(header) io.write("\n") end
+
+    if options.prev_permutation then printFunc("prev_permutation: "..Array.tostring(options.prev_permutation)) end
+    if options.stop_permutation then printFunc("stop_permutation: "..Array.tostring(options.stop_permutation)) end
+    if options.prev_forms       then printFunc("prev_forms: "..Array.tostring(options.prev_forms))             end
+    if options.number_permutations_to_inspect then printFunc("number_permutations_to_inspect: "..number_permutations_to_inspect) end
+    if options.number_solutions_to_inspect    then printFunc("number_solutions_to_inspect: "..number_solutions_to_inspect)       end
+end
+
+local function PrintStatistics(shapes, permutations_visited, total_visited, header, printFunc)
+    printFunc = printFunc or print
+    assert(IsCallable(printFunc), "PrintStatistics: printFunc is not a callable object")
+
+    if header then io.write(header) io.write("\n") end
+
+    local permutations_count = NumberOfPermutations(shapes)
+    local w = 4
+    printFunc(string.format("Permutaitons visited:      %d / %d (%."..w.."f %%) / %d (%."..w.."f %%)",
+                            permutations_visited,
+                            permutations_count,
+                            permutations_visited / permutations_count * 100,
+                            Factorial(#shapes),
+                            permutations_visited / Factorial(#shapes) * 100))
+
+    local forms_per_permutations = 1
+    for i = 1,#shapes do
+        forms_per_permutations = forms_per_permutations * shapes[i].UniqueFormsCount
+    end
+    printFunc(string.format("Total Iterations visited:  %d / %d (%."..w.."f %%) / %d (%."..w.."f %%)",
+                            total_visited,
+                            permutations_count * forms_per_permutations,
+                            total_visited / (permutations_count * forms_per_permutations) * 100,
+                            Factorial(#shapes) * forms_per_permutations,
+                            total_visited / (Factorial(#shapes) * forms_per_permutations) * 100))
+end
+
 -- optimized brure force
 -- options can have:
 -- -- print_debug_info
+-- -- statistics_output_filename // TODO: this has no effect
 -- -- prev_permutation
 -- -- stop_permutation
 -- -- prev_forms
@@ -238,6 +280,8 @@ function SuitablePlacements(grid, shapes, options)
 
     options = options or {}
     assert(IsTable(options), "SuitablePlacements: options is not a table")
+    assert(not debug.statistics_output_filename or IsString(options.statistics_output_filename),
+           "SuitablePlacements: options.statistics_output_filename is not a string")
     assert(not options.prev_permutation or IsPermutation(options.prev_permutation, init_per),
            "SuitablePlacements: options.prev_premutation is not permutation of initial permutation of shapes which is: "..Array.tostring(init_per))
     assert(not options.stop_permutation or IsPermutation(options.stop_permutation, init_per),
@@ -323,7 +367,7 @@ function SuitablePlacements(grid, shapes, options)
                 -- jump to next forms
                 local resets_cnt = 0
                 for i = len,1,-1 do
-                    prev_forms[i] = ( (prev_forms[i] + 1) - 1) % pshapes[i].UniqueRotationsCount + 1
+                    prev_forms[i] = ( (prev_forms[i] + 1) - 1) % pshapes[i].UniqueFormsCount + 1
                     if prev_forms[i] ~= 1 then
                         break
                     end
@@ -378,7 +422,7 @@ function SuitablePlacements(grid, shapes, options)
             local cur_shape_idx = 1
             while 0 < cur_shape_idx and cur_shape_idx <= len do
                 local could_place = false
-                while forms[cur_shape_idx] <= pshapes[cur_shape_idx].UniqueRotationsCount do
+                while forms[cur_shape_idx] <= pshapes[cur_shape_idx].UniqueFormsCount do
 
                     if options.print_debug_info then
                         print("Try shape #"..cur_shape_idx.." with form "..forms[cur_shape_idx])
@@ -440,7 +484,7 @@ function SuitablePlacements(grid, shapes, options)
                         wrong_shape_max_idx = cur_shape_idx
                     end
                     -- if could not place shape at current index go back and try to switch form one of prev shapes
-                    while cur_shape_idx > 0 and pshapes[cur_shape_idx].UniqueRotationsCount - forms[cur_shape_idx] <= 0 --[[-1 or 0]] do
+                    while cur_shape_idx > 0 and pshapes[cur_shape_idx].UniqueFormsCount - forms[cur_shape_idx] <= 0 --[[-1 or 0]] do
                         forms[cur_shape_idx] = 1
                         cur_shape_idx = cur_shape_idx - 1
                         if cur_shape_idx >= 1 then
@@ -520,58 +564,15 @@ function SuitablePlacements(grid, shapes, options)
         if options.print_debug_info then
             print("Done")
         end
-        
-        PrintOptions(options, "=========== Options Settings Used ===========")
-        PrintStatistics(shapes, permutations_visited, total_visited, "=========== SuitablePlacements Statistic ==============")
+
+        -- PrintOptions(options, "=========== Options Settings Used ===========")
+        -- PrintStatistics(shapes, permutations_visited, total_visited, "=========== SuitablePlacements Statistic ==============")
         
         return nil
     end
 end
 
--- -- print_debug_info
--- -- prev_permutation
--- -- stop_permutation
--- -- prev_forms
--- -- number_permutations_to_inspect
--- -- number_solutions_to_inspect
-function PrintOptions(options, header)
-    if not options or not next(options) then return end
-    if header then io.write(header) io.write("\n") end
-
-    if options.prev_permutation then print("prev_permutation: "..Array.tostring(options.prev_permutation)) end
-    if options.stop_permutation then print("stop_permutation: "..Array.tostring(options.stop_permutation)) end
-    if options.prev_forms       then print("prev_forms: "..Array.tostring(options.prev_forms))             end
-    if options.number_permutations_to_inspect then print("number_permutations_to_inspect: "..number_permutations_to_inspect) end
-    if options.number_solutions_to_inspect    then print("number_solutions_to_inspect: "..number_solutions_to_inspect)       end
-end
-
-function PrintStatistics(shapes, permutations_visited, total_visited, header)
-    if header then io.write(header) io.write("\n") end
-
-    local permutations_count = NumberOfPermutations(shapes)
-    local w = 4
-    print(string.format("Permutaitons visited:      %d / %d (%."..w.."f %%) / %d (%."..w.."f %%)",
-                         permutations_visited,
-                         permutations_count,
-                         permutations_visited / permutations_count * 100,
-                         Factorial(#shapes),
-                         permutations_visited / Factorial(#shapes) * 100))
-
-    local forms_per_permutations = 1
-    for i = 1,#shapes do
-        forms_per_permutations = forms_per_permutations * shapes[i].UniqueRotationsCount
-    end
-    print(string.format("Total Iterations visited:  %d / %d (%."..w.."f %%) / %d (%."..w.."f %%)",
-                         total_visited,
-                         permutations_count * forms_per_permutations,
-                         total_visited / (permutations_count * forms_per_permutations) * 100,
-                         Factorial(#shapes) * forms_per_permutations,
-                         total_visited / (Factorial(#shapes) * forms_per_permutations) * 100))
-end
-
--- lua -lSigils -e "for p, r in SuitablePlacements(Grid.create(4, 4), {Shapes.Talos.Z, Shapes.Talos.L, Shapes.Talos.I, Shapes.Talos.J}, {print_debug_info = true}) do end"
-
-function FindAnySolution(grid, shapes, start_permutation, stop_permutaion)
+function FindFirstSolution(grid, shapes, start_permutation, stop_permutaion)
     for p, r in SuitablePlacements(grid, shapes, {prev_permutation = start_permutation, stop_permutaion = stop_permutaion}) do
         return p, r
     end
@@ -581,9 +582,9 @@ end
 function FindRandomSolution(grid, shapes)
     local init_per = GetInitialPermutation(shapes)
     Array.shuffle(init_per)
-    p, f = FindAnySolution(grid, shapes, init_per)
+    p, f = FindFirstSolution(grid, shapes, init_per)
     if p then
         return p, f
     end
-    return FindAnySolution(grid, shapes, nil, init_per)
+    return FindFirstSolution(grid, shapes, nil, init_per)
 end

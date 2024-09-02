@@ -22,7 +22,7 @@ Shapes = {
             },
 
             Area = 4,
-            UniqueRotationsCount = 4
+            UniqueFormsCount = 4
         },
         J = {
             Forms = {
@@ -42,7 +42,7 @@ Shapes = {
             },
 
             Area = 4,
-            UniqueRotationsCount = 4
+            UniqueFormsCount = 4
         },
         I = {
             Forms = {
@@ -55,7 +55,7 @@ Shapes = {
             },
 
             Area = 4,
-            UniqueRotationsCount = 2
+            UniqueFormsCount = 2
         },
         S = {
             Forms = {
@@ -68,7 +68,7 @@ Shapes = {
             },
 
             Area = 4,
-            UniqueRotationsCount = 2
+            UniqueFormsCount = 2
         },
         Z = {
             Forms = {
@@ -81,7 +81,7 @@ Shapes = {
             },
 
             Area = 4,
-            UniqueRotationsCount = 2
+            UniqueFormsCount = 2
         },
         Square = {
             Forms = {
@@ -90,7 +90,7 @@ Shapes = {
             },
 
             Area = 4,
-            UniqueRotationsCount = 1
+            UniqueFormsCount = 1
         },
         T = {
             Forms = {
@@ -110,7 +110,7 @@ Shapes = {
             },
             
             Area = 4,
-            UniqueRotationsCount = 4
+            UniqueFormsCount = 4
         }
     },
 
@@ -131,7 +131,7 @@ Shapes = {
             },
 
             Area = 3,
-            UniqueRotationsCount = 4
+            UniqueFormsCount = 4
         },
         CornerBig = {
             Forms = {
@@ -153,7 +153,7 @@ Shapes = {
             },
 
             Area = 5,
-            UniqueRotationsCount = 4
+            UniqueFormsCount = 4
         },
         Square = {
             Forms = {
@@ -162,7 +162,7 @@ Shapes = {
             },
 
             Area = 4,
-            UniqueRotationsCount = 1
+            UniqueFormsCount = 1
         },
         I = {
             Forms = {
@@ -175,7 +175,7 @@ Shapes = {
             },
 
             Area = 4,
-            UniqueRotationsCount = 2
+            UniqueFormsCount = 2
         },
         L = {
             Forms = {
@@ -209,7 +209,7 @@ Shapes = {
             },
 
             Area = 4,
-            UniqueRotationsCount = 8
+            UniqueFormsCount = 8
         },
         LBig = {
             Forms = {
@@ -247,7 +247,7 @@ Shapes = {
             },
 
             Area = 5,
-            UniqueRotationsCount = 8
+            UniqueFormsCount = 8
         },
         X = {
             Forms = {
@@ -257,7 +257,7 @@ Shapes = {
             },
 
             Area = 5,
-            UniqueRotationsCount = 1
+            UniqueFormsCount = 1
         },
         Clip = {
             Forms = {
@@ -277,7 +277,7 @@ Shapes = {
             },
 
             Area = 5,
-            UniqueRotationsCount = 4
+            UniqueFormsCount = 4
         },
         Zig = {
             Forms = {
@@ -299,7 +299,7 @@ Shapes = {
             },
             
             Area = 5,
-            UniqueRotationsCount = 4
+            UniqueFormsCount = 4
         },
         Snake = {
             Forms = {
@@ -337,7 +337,7 @@ Shapes = {
             },
 
             Area = 5,
-            UniqueRotationsCount = 8
+            UniqueFormsCount = 8
         },
         Crane = {
             Forms = {
@@ -375,7 +375,7 @@ Shapes = {
             },
 
             Area = 5,
-            UniqueRotationsCount = 8
+            UniqueFormsCount = 8
         },
         Chocolate = {
             Forms = {
@@ -409,7 +409,7 @@ Shapes = {
             },
 
             Area = 5,
-            UniqueRotationsCount = 8
+            UniqueFormsCount = 8
         }
     }
 }
@@ -424,8 +424,8 @@ function Shapes.valid(shape)
     if not shape.Area then
         return false, "shape.Area is nil"
     end
-    if not shape.UniqueRotationsCount then
-        return false, "shape.UniqueRotationsCount is nil"
+    if not shape.UniqueFormsCount then
+        return false, "shape.UniqueFormsCount is nil"
     end
     return true
 end
@@ -439,7 +439,7 @@ function Shapes.getForm(shape, form)
     form = form or 1
     -- assert(IsTable(shape) and IsInteger(form))
 
-    local idx = (form - 1) % shape.UniqueRotationsCount + 1
+    local idx = (form - 1) % shape.UniqueFormsCount + 1
     return shape.Forms[idx]
 end
 
@@ -449,7 +449,7 @@ function Shapes.print(shape, form)
 
     Matrix.print(Shapes.getForm(shape, form))
     print("Area:",                 shape.Area)
-    print("UniqueRotationsCount:", shape.UniqueRotationsCount)
+    print("UniqueFormsCount:", shape.UniqueFormsCount)
 end
 
 -- pretty
@@ -525,7 +525,7 @@ end
 function Shapes.equals(shape, other)
     -- assert(IsTable(shape) and IsTable(other))
 
-    if shape.Area ~= other.Area or shape.UniqueRotationsCount ~= other.UniqueRotationsCount then
+    if shape.Area ~= other.Area or shape.UniqueFormsCount ~= other.UniqueFormsCount then
         return false
     end
 
@@ -540,7 +540,7 @@ function Shapes.validForms(shapes, forms)
     end
 
     for i, shape in ipairs(shapes) do
-        if not Shapes.valid(shape) and math.type(forms[i]) ~= "integer" and forms[i] > shape.UniqueRotationsCount then
+        if not Shapes.valid(shape) and math.type(forms[i]) ~= "integer" and forms[i] > shape.UniqueFormsCount then
             return false
         end
     end

@@ -36,5 +36,5 @@ function IsNumber(n)
 end
 
 function IsCallable(c)
-    return type(c) == FUNCTION or getmetatable(c).__call
+    return type(c) == FUNCTION or (getmetatable(c) or {}).__call
 end

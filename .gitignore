@@ -3,14 +3,12 @@ Debug/
 
 # lua compiler output
 *.out
-
-# generated scripts
+# generated files
 *.bat
-!SolveLonposOptimized.bat
+
+!Solve/LonposOptimized.bat
 
 *.sh
 !TestRun.sh
 
-# generated files
-lonpos_solutions/
 *.txt

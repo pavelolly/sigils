@@ -2,7 +2,7 @@ require "Sigils"
 
 grid = Grid.create(5, 11)
 shapes = {
-    Shapes.Lonpos.Corner,
+    Shapes.Lonpos.Corner,    
     Shapes.Lonpos.CornerBig,
     Shapes.Lonpos.Square,
     Shapes.Lonpos.I,

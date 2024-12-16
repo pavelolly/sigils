@@ -3,9 +3,9 @@ Debug/
 
 # lua compiler output
 *.out
+
 # generated files
 *.bat
-
 !Solve/LonposOptimized.bat
 
 *.sh

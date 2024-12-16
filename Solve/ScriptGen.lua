@@ -11,7 +11,7 @@ ScriptType = {
 -- setup_lua_filename - name if the file with problem setup information (grid and shapes)
 -- start_permutation, end_permutaion - bounds in which to look for solutions (set both to nil if you want to find all of the solutions)
 -- number_processes - number of processes that will run to solve the problem
-function GenereteScript(script_filename, script_type, setup_lua_filename, start_permutation, end_permutaion, number_processes)
+function GenerateScript(script_filename, script_type, setup_lua_filename, start_permutation, end_permutaion, number_processes)
     assert(script_type == ScriptType.Bat or script_type == ScriptType.Bash, "unknown script type")
 
     -- run setup file to get shapes
@@ -72,5 +72,3 @@ function GenereteScript(script_filename, script_type, setup_lua_filename, start_
 
     script_file:close()
 end
-
-GenereteScript("Lonpos", ScriptType.Bat, "Solve/LonposSetup.lua", nil, nil, 12)

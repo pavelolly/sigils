@@ -1,14 +1,15 @@
 # Description
 
-Sigils is Lua program made for searching for solutions to the problem of placing different shapes onto rectangular grid.
+Sigils is a Lua program that solves shape-placement puzzles on rectangular grids.
 
-For exmaple, let's say we have 4 Tetris shapes: I, L, J and Z, and we want to place them onto 4x4 grid like so
+For example, suppose you have four Tetris shapes: I, L, J, and Z - and want to fit them onto a 4×4 grid like so
 
 <img src=".github/images/talos-example-.jpg" width="30%" height="30%"></img>
 
-The above image is from the game [The Talos Principle](https://store.steampowered.com/app/257510/The_Talos_Principle/) by [Croteam](https://www.croteam.com) which inspired this project (also those Tetris shapes are called sigils in the game, which is the name of the project)
+The image above shows a puzzle from [The Talos Principle](https://store.steampowered.com/app/257510/The_Talos_Principle/) by [Croteam](https://www.croteam.com) which inspired this project. In the game, these Tetris-like shapes are called "sigils" - hence the name of this program.
 
-The program has functionality to find all of such placements by doing some "smart" brute forcing
+The program finds all possible ways to arrange them by using a "smart" brute-force search:
+instead of checking every possible combination, it skips impossible placements early, making the search faster.
 
 # Quick Start
 
@@ -76,12 +77,16 @@ Forms:       {1, 3, 2, 2}
  {4, 4, 4, 4}}
 ```
 
-Notice that if number of grid rows is less than number of grid columns then shapes are placed in order up-bottom left-right and otherwise left-right up-bottom. This is done for brute force optimization purposes.
+Note: To optimize the brute-force search, shapes are placed in different orders depending on grid dimensions:
+
+If rows < columns: shapes are placed top-to-bottom, left-to-right
+
+Otherwise: shapes are placed left-to-right, top-to-bottom
 
 # Script for parallel computation
 
 If you want to find all solutions for a big grid with many shapes you may want to use several threads
-(it want help that much though: brute forcing O(n!4^n) is going to be slow anyway)
+(it want help that much though: brute forcing O(n!*4^n) is going to be slow anyway)
 
 You can generate shell script that starts several lua processes to compute things in parallel
 
@@ -123,29 +128,7 @@ GenerateScript(
 
 Those scripts will run several processes that run Solve/Solve.lua script and defines the grid, shapes and boundaries to brute force. Each process will write solutions to a files with names `<script_name>_<process_number>.txt`
 
-Examples of script files
-
-.bat:
-```Bat
-@echo off
-
-set preexec="dofile 'Solve/LonposSetup.lua'; package.path = package.path..';../?.lua;../?'"
-
-start /B lua -e %preexec% Solve\Solve.lua Lonpos505_1 "{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}" "{1, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2}"
-start /B lua -e %preexec% Solve\Solve.lua Lonpos505_2 "{2, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}" "{2, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 1}"
-start /B lua -e %preexec% Solve\Solve.lua Lonpos505_3 "{3, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12}" "{3, 12, 11, 10, 9, 8, 7, 6, 5, 4, 2, 1}"
-start /B lua -e %preexec% Solve\Solve.lua Lonpos505_4 "{4, 1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12}" "{4, 12, 11, 10, 9, 8, 7, 6, 5, 3, 2, 1}"
-start /B lua -e %preexec% Solve\Solve.lua Lonpos505_5 "{5, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12}" "{5, 12, 11, 10, 9, 8, 7, 6, 4, 3, 2, 1}"
-start /B lua -e %preexec% Solve\Solve.lua Lonpos505_6 "{6, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12}" "{6, 12, 11, 10, 9, 8, 7, 5, 4, 3, 2, 1}"
-start /B lua -e %preexec% Solve\Solve.lua Lonpos505_7 "{7, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12}" "{7, 12, 11, 10, 9, 8, 6, 5, 4, 3, 2, 1}"
-start /B lua -e %preexec% Solve\Solve.lua Lonpos505_8 "{8, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12}" "{8, 12, 11, 10, 9, 7, 6, 5, 4, 3, 2, 1}"
-start /B lua -e %preexec% Solve\Solve.lua Lonpos505_9 "{9, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12}" "{9, 12, 11, 10, 8, 7, 6, 5, 4, 3, 2, 1}"
-start /B lua -e %preexec% Solve\Solve.lua Lonpos505_10 "{10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12}" "{10, 12, 11, 9, 8, 7, 6, 5, 4, 3, 2, 1}"
-start /B lua -e %preexec% Solve\Solve.lua Lonpos505_11 "{11, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12}" "{11, 12, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1}"
-start /B lua -e %preexec% Solve\Solve.lua Lonpos505_12 "{12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}" "{12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1}"
-```
-
-or 
+Examples of script file
 
 .sh:
 ```Bash
@@ -167,6 +150,5 @@ lua -e $preexec Solve/Solve.lua Lonpos505_11 "{11, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
 lua -e $preexec Solve/Solve.lua Lonpos505_12 "{12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}" "{12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1}" &
 ```
 
-Be aware that this uniform divide that takes place to determine boundaries is not optimal solutions: some processes will stop immediately and some of them will do a lot of work. For example, in the above case process 7 stops immediately as it quickly recognizes that there are no solutions that start with shape 7, or process 11 will take the longest as there are a lot of solutions within its boundaries.
-
-Because of this there is `Solve/LonposOptimizedScript.bat` that is manually tweaked to have more optimized separation of permutation intervals.
+Note: This way of splitting permutation ranges is very naive and far from the most efficient for parallel processing. For example, process 7 will finish instantly because it quickly finds no solutions starting with shape 7. Meanwhile, Process 11 will take the longest since most solutions fall in that range.
+`Solve/LonposOptimizedScript.bat` has manually tweaked ranges for the above exmaple and works slightly better.
